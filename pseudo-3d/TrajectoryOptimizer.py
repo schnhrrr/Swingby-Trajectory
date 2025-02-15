@@ -221,7 +221,7 @@ class TrajectoryOptimizer:
    
     def plot_force_magnitudes(self):
         
-        self.fig_forces = plt.figure()
+        plt.figure()
         plt.plot(self.t_plt, self.T_mag + self.G_mag, label='Required force magnitude')
         plt.plot(self.t_plt, self.G_mag, label='Total gravity', color='k', linestyle='--')
         plt.plot(self.t_plt, self.T_mag, label='Thrust magnitude', color='g')
