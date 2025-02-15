@@ -25,7 +25,7 @@ class PINN(nn.Module):
         firstlayer = self.fci(t)
         hiddenlayer = self.fch(firstlayer)
         xyz = self.fco(hiddenlayer)
-        g = torch.cat([2*t-1, 2*t-1, 2*t-1], dim=1)
+        g = torch.cat([2*t-1, 2*t-1, torch.zeros_like(t)], dim=1)
         phi = torch.cat([t*(1-t),t*(1-t),t*(1-t)], dim=1)
         xyz_transformed = g + phi * xyz
         return xyz_transformed
@@ -67,7 +67,8 @@ class TrajectoryOptimizer:
         self.G_mag = self.G.norm(dim=1).detach().numpy()
         self.T_mag = self.T.norm(dim=1).detach().numpy()
         
-        self.plot_trajectory()
+        self.plot_trajectory2d()
+        self.plot_trajectory3d()
         self.plot_force_magnitudes()
         self.plot_loss()
     
@@ -76,7 +77,7 @@ class TrajectoryOptimizer:
         self.G = torch.zeros_like(self.r)
         for ao in self.ao_xyzgm:
             r_diff = self.r - ao[:3]
-            denominator = (torch.linalg.norm(r_diff, dim=1) + self.eps)**1.5
+            denominator = (torch.linalg.norm(r_diff, dim=1) + self.eps)**3
             self.G[:,0] += -ao[-1] * r_diff[:,0] / denominator
             self.G[:,1] += -ao[-1] * r_diff[:,1] / denominator
             self.G[:,2] += -ao[-1] * r_diff[:,2] / denominator
@@ -101,7 +102,10 @@ class TrajectoryOptimizer:
     def train_model(self):
 
         for i in range(self.n_adam + self.n_lbfgs):
-            print(i)
+            if i % 20 == 0 and i < self.n_adam:
+                print(f'ADAM: {i}')
+            elif i % 10 == 0 and i > self.n_adam:
+                print(f'LBFGS: {i}')
             if i < self.n_adam:
                 self.optimizer = self.adam
                 self.optimizer.zero_grad()
@@ -125,7 +129,7 @@ class TrajectoryOptimizer:
 
     def plot_loss(self):
 
-        plt.figure(figsize=(8, 5))
+        self.fig_loss = plt.figure()
         plt.plot(self.loss_history, label='Loss(Training epochs)')
         plt.yscale('log')
         plt.xlim(left=0)
@@ -134,38 +138,39 @@ class TrajectoryOptimizer:
         plt.ylabel("Loss")
         plt.legend()
         plt.show()
+        self.fig_loss.savefig('loss.png')
 
-    def plot_trajectory(self):
+    def plot_trajectory2d(self):
 
-        x, y, z = self.r_plt[:,0], self.r_plt[:,1], self.r_plt[:,2]
-        self.fig_traj, self.ax_traj = plt.subplots(2,2, figsize=(10,8))
+        self.x, self.y, self.z = self.r_plt[:,0], self.r_plt[:,1], self.r_plt[:,2]
+        self.fig_traj, self.ax_traj = plt.subplots(2,2, figsize=(9,8))
         
         # (x,y)
-        self.ax_traj[0,0].scatter(-1,-1,color='r',marker='o',label=r'$r(t=0)=(-1,-1,-1)$')
-        self.ax_traj[0,0].scatter(1,1,color='r',marker='x',label=r'$r(t=1)=(1,1,1)$')
-        self.ax_traj[0,0].plot(x, y, label='Trajectory')
+        self.ax_traj[0,0].scatter(-1,-1,color='r',marker='o',label=r'$r(t=0)=(-1,-1,0)$')
+        self.ax_traj[0,0].scatter(1,1,color='r',marker='x',label=r'$r(t=1)=(1,1,0)$')
+        self.ax_traj[0,0].plot(self.x, self.y, label='Trajectory')
         self.ax_traj[0,0].set_xlabel('x')
         self.ax_traj[0,0].set_ylabel('y')
 
         # (x,z)
-        self.ax_traj[0,1].scatter(-1,-1,color='r',marker='o',label=f'r(t=0)=(-1,-1,-1)')
-        self.ax_traj[0,1].scatter(1,1,color='r',marker='x',label=f'r(t=0)=(1,1,1)')
-        self.ax_traj[0,1].plot(x, z)
+        self.ax_traj[0,1].scatter(-1,0,color='r',marker='o',label=f'r(t=0)=(-1,-1,-1)')
+        self.ax_traj[0,1].scatter(1,0,color='r',marker='x',label=f'r(t=0)=(1,1,1)')
+        self.ax_traj[0,1].plot(self.x, self.z)
         self.ax_traj[0,1].set_xlabel('x')
         self.ax_traj[0,1].set_ylabel('z')
 
         # (y,z)
-        self.ax_traj[1,0].scatter(-1,-1,color='r',marker='o',label=f'r(t=0)=(-1,-1,-1)')
-        self.ax_traj[1,0].scatter(1,1,color='r',marker='x',label=f'r(t=0)=(1,1,1)')
-        self.ax_traj[1,0].plot(y, z)
+        self.ax_traj[1,0].scatter(-1,0,color='r',marker='o',label=f'r(t=0)=(-1,-1,-1)')
+        self.ax_traj[1,0].scatter(1,0,color='r',marker='x',label=f'r(t=0)=(1,1,1)')
+        self.ax_traj[1,0].plot(self.y, self.z)
         self.ax_traj[1,0].set_xlabel('y')
         self.ax_traj[1,0].set_ylabel('z')
 
         # Plotting gravity and thrust arrows
-        step = len(self.r_plt) // 10
-        self.r_q = self.r_plt[::step,:]
-        self.G_q = self.G_plt[::step,:]
-        self.T_q = self.T_plt[::step,:]
+        self.step = len(self.r_plt) // 10
+        self.r_q = self.r_plt[::self.step,:]
+        self.G_q = self.G_plt[::self.step,:]
+        self.T_q = self.T_plt[::self.step,:]
         self.ax_traj[0,0].quiver(self.r_q[:,0], self.r_q[:,1], self.G_q[:,0], self.G_q[:,1], color='k', scale=self.quiver_scale, label=rf'Gravity/{self.quiver_scale}')
         self.ax_traj[0,0].quiver(self.r_q[:,0], self.r_q[:,1], self.T_q[:,0], self.T_q[:,1], color='#FFA500',scale=self.quiver_scale, label=rf'Thrust/{self.quiver_scale}')
         self.ax_traj[0,1].quiver(self.r_q[:,0], self.r_q[:,2], self.G_q[:,0], self.G_q[:,2], color='k', scale=self.quiver_scale, label='Gravity')
@@ -174,7 +179,7 @@ class TrajectoryOptimizer:
         self.ax_traj[1,0].quiver(self.r_q[:,1], self.r_q[:,2], self.T_q[:,1], self.T_q[:,2], color='#FFA500', scale=self.quiver_scale, label='Thrust')
 
         # Legend
-        self.plot_masses()
+        self.plot_masses(2)
         h, l = self.ax_traj[0,0].get_legend_handles_labels()
         self.ax_traj[1,1].legend(h, l, loc='center')
         self.ax_traj[1,1].set_frame_on(False)
@@ -183,18 +188,40 @@ class TrajectoryOptimizer:
 
         plt.tight_layout()
         plt.show()
+        self.fig_traj.savefig('traj.png')
 
-    def plot_masses(self):
+    def plot_trajectory3d(self):
+
+        self.fig_3d = plt.figure(figsize=(6,6))
+        self.ax3d = self.fig_3d.add_subplot(111, projection='3d')
+        self.ax3d.scatter(-1,-1,0, marker='o', color='r', label=f'r(0)=(-1,-1,0)')
+        self.ax3d.scatter(1,1,0, marker='x', color='r', label=f'r(1)=(1,1,0)')  
+        self.ax3d.plot3D(self.x, self.y, self.z, label='Trajectory', c='#1f77b4')
+        self.ax3d.quiver(self.r_q[:,0], self.r_q[:,1], self.r_q[:,2], self.G_q[:,0], self.G_q[:,1], self.G_q[:,2], color='k', label=f'Gravity')
+        self.ax3d.quiver(self.r_q[:,0], self.r_q[:,1], self.r_q[:,2], self.T_q[:,0], self.T_q[:,1], self.T_q[:,2], color='#FFA500', label=f'Thrust')
+        self.ax3d.set_xlabel(r'$x$')
+        self.ax3d.set_ylabel(r'$y$')
+        self.ax3d.set_zlabel(r'$z$')
+        
+        self.plot_masses(3)
+        self.ax3d.legend(loc='upper center', ncol=3) 
+        self.fig_3d.savefig('traj3d.png')
+        
+
+    def plot_masses(self, dim):
 
         colors = ['#006400', '#228B22', '#6B8E23']
         for i, ao in enumerate(self.ao_plt):
-            self.ax_traj[0,0].scatter(ao[0], ao[1], s=ao[3]*self.planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={ao[3]}$')
-            self.ax_traj[0,1].scatter(ao[0], ao[2], s=ao[3]*self.planet_size, color=colors[i], marker='o', label=fr'$GM_{i+1}={ao[3]}$')
-            self.ax_traj[1,0].scatter(ao[1], ao[2], s=ao[3]*self.planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={ao[3]}$')
-            
+            if dim == 2:
+                self.ax_traj[0,0].scatter(ao[0], ao[1], s=ao[3]*self.planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={ao[3]}$')
+                self.ax_traj[0,1].scatter(ao[0], ao[2], s=ao[3]*self.planet_size, color=colors[i], marker='o', label=fr'$GM_{i+1}={ao[3]}$')
+                self.ax_traj[1,0].scatter(ao[1], ao[2], s=ao[3]*self.planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={ao[3]}$')
+            if dim == 3:
+                self.ax3d.scatter(*ao[:3], s=ao[3]*self.planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={ao[3]}$')
+   
     def plot_force_magnitudes(self):
         
-        plt.figure()
+        self.fig_forces = plt.figure()
         plt.plot(self.t_plt, self.T_mag + self.G_mag, label='Required force magnitude')
         plt.plot(self.t_plt, self.G_mag, label='Total gravity', color='k', linestyle='--')
         plt.plot(self.t_plt, self.T_mag, label='Thrust magnitude', color='g')
@@ -204,17 +231,19 @@ class TrajectoryOptimizer:
         plt.xlim(0,1)
         plt.legend()
         plt.show()
+        plt.savefig('force.png')
 
 # %%
 
 t_colloc = torch.linspace(0,1,100).view(-1,1).requires_grad_(True)
 t_total = torch.tensor(1.0, requires_grad=True)
-r0 = torch.tensor([[-1.,-1.,-1.]])
-r1 = torch.tensor([[1.,1.,1.]])
-m0 = 1.
-ao_xyzgm = [[-0.5, -1., -0.1, 0.5],  # astronomic objects: x, y, z gravitational mass
-            [-0.2, 0.4, 0.2, 1.0],
-            [ 0.8, 0.3, 1.4, 0.5]]
+
+r0 = torch.tensor([[-1.,-1.,0.]])
+r1 = torch.tensor([[1.,1.,0.]])
+
+ao_xyzgm = [[-0.5, -1., 0., 0.5],  # astronomic objects: x, y, z gravitational mass
+            [-0.2, 0.4, 0., 1.0],
+            [ 0.8, 0.3, 0., 0.5]]
    
 # Initialize model
 pinn = PINN(1, 3, 50, 3)
@@ -226,8 +255,7 @@ optimizer_lbfgs = torch.optim.LBFGS(params, lr=.1, max_iter=10)
 # Set random seed
 seed = 123
 torch.manual_seed(seed)
-np.random.seed(seed)
 
-obj = TrajectoryOptimizer(pinn, ao_xyzgm, t_colloc, t_total, r0, r1, optimizer_lbfgs, optimizer_adam, w_physics=1, n_adam=100)
+obj = TrajectoryOptimizer(pinn, ao_xyzgm, t_colloc, t_total, r0, r1, optimizer_lbfgs, optimizer_adam, n_adam=0, w_physics=1)
 
 # %%

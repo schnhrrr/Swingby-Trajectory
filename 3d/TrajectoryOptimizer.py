@@ -138,6 +138,7 @@ class TrajectoryOptimizer:
         plt.ylabel("Loss")
         plt.legend()
         plt.show()
+        self.fig_loss.savefig('loss.png')
 
     def plot_trajectory2d(self):
 
@@ -187,6 +188,7 @@ class TrajectoryOptimizer:
 
         plt.tight_layout()
         plt.show()
+        self.fig_traj.savefig('traj.png')
 
     def plot_trajectory3d(self):
 
@@ -204,6 +206,7 @@ class TrajectoryOptimizer:
         
         self.plot_masses(3)
         self.ax3d.legend(loc='upper center', ncol=3) 
+        self.fig_3d.savefig('traj3d.png')
         
 
     def plot_masses(self, dim):
@@ -229,6 +232,7 @@ class TrajectoryOptimizer:
         plt.xlim(0,1)
         plt.legend()
         plt.show()
+        plt.savefig('force.png')
 
 # %%
 
