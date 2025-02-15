@@ -129,7 +129,7 @@ class TrajectoryOptimizer:
 
     def plot_loss(self):
 
-        plt.figure()
+        self.fig_loss = plt.figure()
         plt.plot(self.loss_history, label='Loss(Training epochs)')
         plt.yscale('log')
         plt.xlim(left=0)
@@ -222,7 +222,7 @@ class TrajectoryOptimizer:
    
     def plot_force_magnitudes(self):
         
-        plt.figure()
+        self.fig_force = plt.figure()
         plt.plot(self.t_plt, self.T_mag + self.G_mag, label='Required force magnitude')
         plt.plot(self.t_plt, self.G_mag, label='Total gravity', color='k', linestyle='--')
         plt.plot(self.t_plt, self.T_mag, label='Thrust magnitude', color='g')
@@ -232,7 +232,7 @@ class TrajectoryOptimizer:
         plt.xlim(0,1)
         plt.legend()
         plt.show()
-        plt.savefig('force.png')
+        self.fig_force.savefig('force.png')
 
 # %%
 
@@ -241,9 +241,9 @@ t_total = torch.tensor(1.0, requires_grad=True)
 r0 = torch.tensor([[-1.,-1.,-1.]])
 r1 = torch.tensor([[1.,1.,1.]])
 
-ao_xyzgm = [[-0.5, -1., -0.1, 0.5],  # astronomic objects: x, y, z gravitational mass
-            [-0.2, 0.4, 0.2, 1.0],
-            [ 0.8, 0.3, 1.4, 0.5]]
+ao_xyzgm = [[-0.5, -0.2, -0.1, 1.0],  # astronomic objects: x, y, z gravitational mass
+            [-0.9, -0.7, -1.5, 0.6],
+            [ 1.8, 0.1, 0.7, 0.5]]
    
 # Initialize model
 pinn = PINN(1, 3, 50, 3)
@@ -256,6 +256,6 @@ optimizer_lbfgs = torch.optim.LBFGS(params, lr=.1, max_iter=10)
 seed = 123
 torch.manual_seed(seed)
 
-obj = TrajectoryOptimizer(pinn, ao_xyzgm, t_colloc, t_total, r0, r1, optimizer_lbfgs, optimizer_adam, n_adam=200, w_physics=1)
+obj = TrajectoryOptimizer(pinn, ao_xyzgm, t_colloc, t_total, r0, r1, optimizer_lbfgs, optimizer_adam, n_adam=200, w_physics=1e-1)
 
 # %%
