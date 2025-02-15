@@ -125,7 +125,7 @@ class TrajectoryOptimizer:
 
     def plot_loss(self):
 
-        plt.figure(figsize=(8, 5))
+        self.fig_loss = plt.figure()
         plt.plot(self.loss_history, label='Loss(Training epochs)')
         plt.yscale('log')
         plt.xlim(left=0)
@@ -134,6 +134,7 @@ class TrajectoryOptimizer:
         plt.ylabel("Loss")
         plt.legend()
         plt.show()
+        self.fig_loss.savefig('loss.png')
 
     def plot_trajectory(self):
         x, y = self.r_plt[:, 0], self.r_plt[:, 1]
@@ -160,6 +161,7 @@ class TrajectoryOptimizer:
         
         plt.tight_layout()
         plt.show()
+        self.fig_traj.savefig('traj.png')
 
     def plot_masses(self):
         colors = ['#006400', '#228B22', '#6B8E23']
@@ -168,7 +170,7 @@ class TrajectoryOptimizer:
            
     def plot_force_magnitudes(self):
         
-        plt.figure()
+        self.fig_force = plt.figure()
         plt.plot(self.t_plt, self.T_mag + self.G_mag, label='Required force magn.')
         plt.plot(self.t_plt, self.G_mag, label='Total gravity', color='k', linestyle='--')
         plt.plot(self.t_plt, self.T_mag, label='Thrust magn.', color='g')
@@ -178,6 +180,7 @@ class TrajectoryOptimizer:
         plt.xlim(0,1)
         plt.legend()
         plt.show()
+        self.fig_force.savefig('force.png')
 
 # %%
 
