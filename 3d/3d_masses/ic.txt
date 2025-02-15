@@ -1,6 +1,0 @@
-r0 = [-1,-1,-1]
-r1 = [1,1,1]
-
-ao_xyzgm = [[-0.5, -1., -0.1, 0.5],  # astronomic objects: x, y, z gravitational mass
-            [-0.2, 0.4, 0.2, 1.0],
-            [ 0.8, 0.3, 1.4, 0.5]]
