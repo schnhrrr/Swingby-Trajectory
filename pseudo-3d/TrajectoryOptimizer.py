@@ -233,6 +233,34 @@ class TrajectoryOptimizer:
         plt.show()
         self.fig_force.savefig('force.png')
 
+def rotation_matrix(axis, angle):
+    """
+    Returns the 3x3 rotation matrix for a rotation around an arbitrary axis.
+    
+    Parameters:
+    axis (tuple or list): (ax, ay, az) components of the unit axis vector.
+    angle (float): Rotation angle in degrees.
+    
+    Returns:
+    np.array: 3x3 rotation matrix.
+    """
+    theta = np.radians(angle)  # Convert angle to radians
+    ax, ay, az = axis
+    
+    # Compute trigonometric values
+    c = np.cos(theta)
+    s = np.sin(theta)
+    v = 1 - c
+    
+    # Rotation matrix using Rodrigues' formula
+    R = np.array([
+        [c + ax**2 * v, ax * ay * v - az * s, ax * az * v + ay * s],
+        [ay * ax * v + az * s, c + ay**2 * v, ay * az * v - ax * s],
+        [az * ax * v - ay * s, az * ay * v + ax * s, c + az**2 * v]
+    ])
+    
+    return R
+
 # %%
 
 t_colloc = torch.linspace(0,1,100).view(-1,1).requires_grad_(True)
@@ -241,10 +269,15 @@ t_total = torch.tensor(1.0, requires_grad=True)
 r0 = torch.tensor([[-1.,-1.,0.]])
 r1 = torch.tensor([[1.,1.,0.]])
 
-ao_xyzgm = [[-0.5, -1., 0., 0.5],  # astronomic objects: x, y, z gravitational mass
-            [-0.2, 0.4, 0., 1.0],
-            [ 0.8, 0.3, 0., 0.5]]
+ao_xyzgm = np.array([[-0.5, -1., 0., 0.5],  # astronomic objects: x, y, z gravitational mass
+                    [-0.2, 0.4, 0., 1.0],
+                    [ 0.8, 0.3, 0., 0.5]])
    
+# move planets 
+a = [1,-1,0]*1/np.sqrt(2)
+R = rotation_matrix(a, angle=30)
+ao_xyzgm[:,:3] = ao_xyzgm[:,:3] @ R.T
+
 # Initialize model
 pinn = PINN(1, 3, 50, 3)
 params = list(pinn.parameters())
