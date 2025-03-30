@@ -24,23 +24,16 @@ class PINN(nn.Module):
         self.phi, self.psi = phi, psi
         self.R_fun, self.R_dot_fun, self.V_fun = R, R_dot, V
     
-    def forward(self, t, tN):
+    def forward(self, t):
         firstlayer = self.fci(t)
         hiddenlayer = self.fch(firstlayer)
         x_y_model = self.fco(hiddenlayer)
         
-        R = self.R_fun(t, tN)
-        R_dot = self.R_dot_fun(t, tN)
-        V = self.V_fun(t, tN)
+        R = self.R_fun(t)
+        R_dot = self.R_dot_fun(t)
+        V = self.V_fun(t)
 
-        #t0_plot = t[0][0]
-        #print(f't: {t0_plot}')
-        #print(f'psi: {self.psi(t0_plot, tN)}')
-        #print(f'psi*N: {self.psi(t0_plot, tN) * x_y_model}')
-        #print(f'phi: {self.phi(t0_plot, tN)}')
-        #print(f'phi*(v-R): {self.phi(t0_plot, tN)*(V-R_dot)}')
-
-        return R + self.psi(t, tN) * x_y_model + self.phi(t, tN)*(V-R_dot)
+        return R + self.psi(t) * x_y_model + self.phi(t)*(V-R_dot)
 
 class TrajectoryOptimizer:
 
@@ -131,7 +124,7 @@ class TrajectoryOptimizer:
     def closure(self):
 
         self.optimizer.zero_grad()
-        self.r = self.model(self.t, self.t_total)
+        self.r = self.model(self.t)
         self.compute_thrust()
         self.loss_physics = torch.mean(self.T.norm(dim=1)) * self.w_physics
         self.loss_history.append(self.loss_physics.detach())
@@ -248,31 +241,34 @@ class TrajectoryOptimizer:
 #%%
 
 t_colloc = torch.linspace(0,1,100).view(-1,1).requires_grad_(True)
-t_total = torch.tensor(1.0, requires_grad=True)
+t_total = torch.tensor(2.14, requires_grad=True)
 
 x0 = torch.tensor([[-1., -1., 0.]])
 xN = torch.tensor([[1., 1., 0.]])
 
-#v0 = torch.tensor([10., 10., 0], requires_grad=True)
-#vN = torch.tensor([1., 1., 0], requires_grad=True)
+v0 = torch.tensor([1., 1., 0])
+vN = torch.tensor([1., 1., 0])
 
-v0 = torch.tensor([0.0320, 0.9444, 0.])
-vN = torch.tensor([0.6285, 0.2652, 0.]) # used from transformed 2D solution with seed=123
+#v0 = torch.tensor([-0.15783046185970306, 0.8250582218170166, 0.]) # seed 2809
+#vN = torch.tensor([0.5120313763618469, 0.12536530196666718, 0.])
 
-def R(t, tN):
-    return t/tN * (xN - x0) + x0
+#v0 = torch.tensor([0.0319753997027874, 0.944392740726471, 0.])
+#vN = torch.tensor([0.6284629106521606, 0.2652343511581421, 0.]) # used from transformed 2D solution with seed=123
+
+def R(t):
+    return t * (xN - x0) + x0
      
-def R_dot(t, tN):
-    return (xN - x0) / tN
+def R_dot(t):
+    return (xN - x0) 
 
-def V(t, tN):
-    return t/tN * (vN - v0) + v0
+def V(t):
+    return t * (vN - v0) + v0
 
-def phi(t, tN):
-    return (t**3 * (10 * tN**2 - 15 * tN * t + 6 * t**2)) / tN**5#2*t**3/tN**2 - 3*t**2/tN + t#1 - torch.cos(2*np.pi*t/tN)
+def phi(t):
+    return  2*t**3 - 3*t**2 + t #1 - torch.cos(2*np.pi*t/tN) #(t**3 * (10 - 15*t + 6*t**2))
 
-def psi(t, tN):
-    return  (t**2 * (tN - t)**2) / tN**4#t**2*(tN - t)**2 #torch.sin(2*np.pi*t/tN)
+def psi(t):
+    return  (t**2 * (1 - t)**2) 
 
 ao_xyzgm = np.array([[-0.5, -1., 0, 0.5],  # astronomic objects: x, y, z gravitational mass
                     [-0.2, 0.4, 0, 1.0],
@@ -281,7 +277,7 @@ ao_xyzgm = np.array([[-0.5, -1., 0, 0.5],  # astronomic objects: x, y, z gravita
 # Initialize model
 pinn = PINN(1, 3, 50, 3, phi, psi, R, R_dot, V)
 params = list(pinn.parameters())
-params.extend([t_total, v0, vN])
+params.append(t_total)
 optimizer_adam = torch.optim.Adam(params, lr=1e-4)
 optimizer_lbfgs = torch.optim.LBFGS(params, lr=.1, max_iter=10)
 
@@ -289,6 +285,6 @@ optimizer_lbfgs = torch.optim.LBFGS(params, lr=.1, max_iter=10)
 seed = 123
 torch.manual_seed(seed)
 
-obj = TrajectoryOptimizer(pinn, ao_xyzgm, t_colloc, t_total, x0, xN, optimizer_lbfgs, optimizer_adam, n_adam=200,n_lbfgs=100, w_physics=1)
+obj = TrajectoryOptimizer(pinn, ao_xyzgm, t_colloc, t_total, x0, xN, optimizer_lbfgs, optimizer_adam, n_adam=100, n_lbfgs=50, w_physics=1)
 
 # %%
