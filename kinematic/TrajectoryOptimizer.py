@@ -190,6 +190,9 @@ class TrajectoryOptimizer:
         self.ax_traj[1,1].set_frame_on(False)
         self.ax_traj[1,1].set_xticks([])
         self.ax_traj[1,1].set_yticks([])
+        
+        self.ax_traj[0,1].set_ylim((-1,1))
+        self.ax_traj[1,0].set_ylim((-1,1))
 
         plt.tight_layout()
         plt.show()
@@ -202,11 +205,12 @@ class TrajectoryOptimizer:
         self.ax3d.scatter(-1,-1,0, marker='o', color='r', label=f'r(0)=(-1,-1,0)')
         self.ax3d.scatter(1,1,0, marker='x', color='r', label=f'r(1)=(1,1,0)')  
         self.ax3d.plot3D(self.x, self.y, self.z, label='Trajectory', c='#1f77b4')
-        self.ax3d.quiver(self.r_q[:,0], self.r_q[:,1], self.r_q[:,2], self.G_q[:,0], self.G_q[:,1], self.G_q[:,2], color='k', label=f'Gravity')
-        self.ax3d.quiver(self.r_q[:,0], self.r_q[:,1], self.r_q[:,2], self.T_q[:,0], self.T_q[:,1], self.T_q[:,2], color='#FFA500', label=f'Thrust')
+        #self.ax3d.quiver(self.r_q[:,0], self.r_q[:,1], self.r_q[:,2], self.G_q[:,0], self.G_q[:,1], self.G_q[:,2], color='k', label=f'Gravity')
+        #self.ax3d.quiver(self.r_q[:,0], self.r_q[:,1], self.r_q[:,2], self.T_q[:,0], self.T_q[:,1], self.T_q[:,2], color='#FFA500', label=f'Thrust')
         self.ax3d.set_xlabel(r'$x$')
         self.ax3d.set_ylabel(r'$y$')
         self.ax3d.set_zlabel(r'$z$')
+        self.ax3d.set_zlim((-1,1))
         
         self.plot_masses(3)
         self.ax3d.legend(loc='upper center', ncol=3) 
@@ -243,17 +247,11 @@ class TrajectoryOptimizer:
 t_colloc = torch.linspace(0,1,100).view(-1,1).requires_grad_(True)
 t_total = torch.tensor(2.14, requires_grad=True)
 
-x0 = torch.tensor([[-1., -1., 0.]])
+x0 = torch.tensor([[-1., -1., 0.]]) 
 xN = torch.tensor([[1., 1., 0.]])
 
-v0 = torch.tensor([1., 1., 0])
-vN = torch.tensor([1., 1., 0])
-
-#v0 = torch.tensor([-0.15783046185970306, 0.8250582218170166, 0.]) # seed 2809
-#vN = torch.tensor([0.5120313763618469, 0.12536530196666718, 0.])
-
-#v0 = torch.tensor([0.0319753997027874, 0.944392740726471, 0.])
-#vN = torch.tensor([0.6284629106521606, 0.2652343511581421, 0.]) # used from transformed 2D solution with seed=123
+v0 = torch.tensor([1., 1., 0]) 
+vN = torch.tensor([1., 1., 0]) 
 
 def R(t):
     return t * (xN - x0) + x0
