@@ -245,7 +245,7 @@ class TrajectoryOptimizer:
 #%%
 
 t_colloc = torch.linspace(0,1,100).view(-1,1).requires_grad_(True)
-t_total = torch.tensor(2.14, requires_grad=True)
+t_total = torch.tensor(1., requires_grad=True)
 
 x0 = torch.tensor([[-1., -1., 0.]]) 
 xN = torch.tensor([[1., 1., 0.]])
