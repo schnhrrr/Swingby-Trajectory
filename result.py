@@ -1,4 +1,3 @@
-#%%
 import numpy as np
 from optimizer import TrajectoryOptimizer
 
@@ -23,13 +22,10 @@ class TrajectoryResult:
         self.T = traj_opt.T.detach().numpy()
         
         # Magnitudes 
-        self.a_mag = np.linalg.norm(self.a, dim=1)
-        self.G_mag = np.linalg.norm(self.G.norm, dim=1)
-        self.T_mag = np.linalg.norm(self.T.norm, dim=1)
+        self.a_mag = np.linalg.norm(self.a, axis=1)
+        self.G_mag = np.linalg.norm(self.G.norm, axis=1)
+        self.T_mag = np.linalg.norm(self.T.norm, axis=1)
 
         self.loss_history = [l.item() for l in traj_opt.loss_history]
         self.loss_physics_history = [l.item() for l in getattr(traj_opt, 'loss_physics_history', [])]
         self.loss_bc_history = [l.item() for l in getattr(traj_opt, 'loss_bc_history', [])]
-
-
-# %%
