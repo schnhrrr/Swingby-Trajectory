@@ -1,7 +1,26 @@
 import torch
 
 class TrajectoryOptimizer:
+    """" Class to optimize the trajectory of a spacecraft using a physics-informed neural network (PINN) denoted in the model attribute.
+    The optimizer uses the PINN to compute the gravity and thrust forces acting on the spacecraft, and then 
+    optimizes the trajectory in a way that no thrust is needed by the spacecraft. So the thrust is equal to the gravity force.
+    The optimizer minimizes the loss function, which is a combination of the physics loss and the boundary condition loss.
+    
+    Args:
+        model (PINN): The PINN model used to compute the trajectory.
+        ao_xyzgm (list): List of lists containing the position and mass of the astronomical objects.
+        t_colloc (torch.Tensor): Collocation points for the trajectory.
+        r0 (torch.Tensor): Initial position of the spacecraft.
+        r1 (torch.Tensor): Final position of the spacecraft.
+        opt_adam (torch.optim.Optimizer): Adam optimizer for the initial optimization.
+        opt_lbfgs (torch.optim.Optimizer): LBFGS optimizer for the final optimization.
+        n_adam (int, optional): Number of iterations for the Adam optimizer. Defaults to 0.
+        n_lbfgs (int, optional): Number of iterations for the LBFGS optimizer. Defaults to 100.
+        w_physics (float, optional): Weight for the physics loss. Defaults to 1.
+        w_bc (float, optional): Weight for the boundary condition loss. Defaults to 0.
 
+    """
+    # TODO: add typehints
     def __init__(self, model, ao_xyzgm, t_colloc, r0, r1, opt_adam, opt_lbfgs, n_adam=0, n_lbfgs=100, w_physics=1, w_bc=0):
         self.model = model  # Pinn
         self.eps = 1e-8
@@ -24,15 +43,12 @@ class TrajectoryOptimizer:
         self.r1 = r1  # r(t=1)
         self.dims = self.r0.shape[-1]  # Number of dimensions
         self.ao_xyzgm = torch.tensor(ao_xyzgm)  # Astronomic objects (r, Gm)
-
-        self.r = self.model(self.t)  # Initial guess for the trajectory
-        self.G = torch.zeros_like(self.r)  # Gravitational force
         
         self._train_model()
 
     def _compute_gravitational_force(self):
 
-        self.G.zero_()
+        self.G = torch.zeros_like(self.r)
         for ao in self.ao_xyzgm:
             r_diff = self.r - ao[:-1]
             denominator = (torch.linalg.norm(r_diff, dim=1) + self.eps)**3
@@ -60,11 +76,13 @@ class TrajectoryOptimizer:
             if i < self.n_adam:
                 self.optimizer = self.adam
                 self.optimizer.zero_grad()
-                self.closure()
+                self._closure()
                 self.optimizer.step()
             else:
                 self.optimizer = self.lbfgs
                 self.optimizer.step(self._closure) 
+
+        print("Trajectory optimization finished.")
 
     def _closure(self):
 
@@ -77,13 +95,13 @@ class TrajectoryOptimizer:
             self.loss_bc = (torch.mean((self.r[0] - self.r0)**2) + torch.mean((self.r[-1] - self.r1)**2)) / 2 * self.w_bc
             self.loss = self.loss_bc + self.loss_physics
 
-            self.loss_physics_history.append(self.loss_physics.detach())
-            self.loss_bc_history.append(self.loss_bc.detach())
-            self.loss_history.append(self.loss.detach())
+            self.loss_physics_history.append(self.loss_physics.item())
+            self.loss_bc_history.append(self.loss_bc.item())
+            self.loss_history.append(self.loss.item())
             self.loss.backward()
             return self.loss
         else:
-            self.loss = self.loss_physics
-            self.loss.backward()
+            self.loss_history.append(self.loss_physics.item())
+            self.loss_physics.backward()
             return self.loss_physics
        
