@@ -1,9 +1,12 @@
+#%%
+import numpy as np
 from optimizer import TrajectoryOptimizer
 
 class TrajectoryResult:
     """Class to extract and store the results of the trajectory optimization."""
 
-    def __init__(self, traj_opt: TrajectoryOptimizer):
+    def __init__(self, label: str, traj_opt: TrajectoryOptimizer):
+        self.label = label # Expriment label
 
         self.t = traj_opt.t.detach().numpy()
         self.t_total = traj_opt.t_total.item()
@@ -20,13 +23,13 @@ class TrajectoryResult:
         self.T = traj_opt.T.detach().numpy()
         
         # Magnitudes 
-        self.a_mag = self.a.norm(dim=1)
-        self.G_mag = self.G.norm(dim=1)
-        self.T_mag = self.T.norm(dim=1)
+        self.a_mag = np.linalg.norm(self.a, dim=1)
+        self.G_mag = np.linalg.norm(self.G.norm, dim=1)
+        self.T_mag = np.linalg.norm(self.T.norm, dim=1)
 
         self.loss_history = [l.item() for l in traj_opt.loss_history]
         self.loss_physics_history = [l.item() for l in getattr(traj_opt, 'loss_physics_history', [])]
         self.loss_bc_history = [l.item() for l in getattr(traj_opt, 'loss_bc_history', [])]
 
 
-        
+# %%
