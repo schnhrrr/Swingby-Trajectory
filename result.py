@@ -23,9 +23,9 @@ class TrajectoryResult:
         
         # Magnitudes 
         self.a_mag = np.linalg.norm(self.a, axis=1)
-        self.G_mag = np.linalg.norm(self.G.norm, axis=1)
-        self.T_mag = np.linalg.norm(self.T.norm, axis=1)
+        self.G_mag = np.linalg.norm(self.G, axis=1)
+        self.T_mag = np.linalg.norm(self.T, axis=1)
 
-        self.loss_history = [l.item() for l in traj_opt.loss_history]
-        self.loss_physics_history = [l.item() for l in getattr(traj_opt, 'loss_physics_history', [])]
-        self.loss_bc_history = [l.item() for l in getattr(traj_opt, 'loss_bc_history', [])]
+        self.loss = [l for l in traj_opt.loss_history]
+        self.loss_physics = [l for l in getattr(traj_opt, 'loss_physics_history', [])]
+        self.loss_bc = [l for l in getattr(traj_opt, 'loss_bc_history', [])]
