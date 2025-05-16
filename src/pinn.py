@@ -24,12 +24,12 @@ class PINN(nn.Module):
         ])
         self.fco = nn.Linear(N_NEURONS, N_OUTPUT)
 
-    def forward(self, t):
+    def forward(self, t, **kwargs):
         x = self.fci(t)
         if self.in_tranform_fn:
-            x = self.in_tranform_fn(t, x)
+            x = self.in_tranform_fn(t, x, **kwargs)
         x = self.fch(x)
         x = self.fco(x)
-        if self.out_transform_fn():
-            return self.out_transform_fn(t, x)
+        if self.out_transform_fn:
+            return self.out_transform_fn(t, x, **kwargs)
         return x
