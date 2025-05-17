@@ -1,4 +1,5 @@
 import torch
+import functools
 #%%
 class TrajectoryOptimizer:
     """" Class to optimize the trajectory of a spacecraft using a physics-informed neural network (PINN) denoted in the model attribute.
@@ -66,23 +67,32 @@ class TrajectoryOptimizer:
         self._compute_gravitational_force()
         self.T = self.a - self.G 
         
+
     def _train_model(self):
+        import functools
+
+        # Instantiate once
+        if isinstance(self.adam, functools.partial):
+            adam_optimizer = self.adam(self.model.parameters(), **getattr(self.adam, 'keywords', {}))
+
+        if isinstance(self.lbfgs, functools.partial):
+            lbfgs_optimizer = self.lbfgs(self.model.parameters(), **getattr(self.lbfgs, 'keywords', {}))
 
         for i in range(self.n_adam + self.n_lbfgs):
-            if i % 20 == 0 and i < self.n_adam:
+            if i % 50 == 0 and i < self.n_adam:
                 print(f'ADAM: {i}')
-            elif i % 10 == 0 and i > self.n_adam:
+            elif i % 50 == 0 and i >= self.n_adam:
                 print(f'LBFGS: {i}')
+
             if i < self.n_adam:
-                self.optimizer = self.adam
+                self.optimizer = adam_optimizer
                 self.optimizer.zero_grad()
                 self._closure()
                 self.optimizer.step()
             else:
-                self.optimizer = self.lbfgs
-                self.optimizer.step(self._closure) 
+                self.optimizer = lbfgs_optimizer
+                self.optimizer.step(self._closure)
 
-        print("Trajectory optimization finished.")
 
     def _closure(self):
 
