@@ -1,0 +1,17 @@
+#%%
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from config.config_2d import position2d_config, vanilla2d_config
+from src.runner import run_experiment
+
+results = []
+for config in [position2d_config, vanilla2d_config]:
+    result = run_experiment(config)
+    print(f"Training of {config['label']} completed.")
+    results.append(result)
+
+
+
+# %%

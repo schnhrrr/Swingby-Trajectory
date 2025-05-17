@@ -16,7 +16,7 @@ def position_2d(t, x, x0, xN):
     """
     #x0, xN = torch.tensor([[-1., -1.]]), torch.tensor([[1., 1.]])
     psi = t * (1 - t)
-    return R(x0, xN) + psi * x      # phi = 0
+    return R(t, x0, xN) + psi * x      # phi = 0
 
 def position_3d(t, x, x0, xN):
     """

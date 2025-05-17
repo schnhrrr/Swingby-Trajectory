@@ -1,6 +1,6 @@
-from pinn import PINN
-from optimizer import TrajectoryOptimizer
-from result import TrajectoryResult
+from src.pinn import PINN
+from src.optimizer import TrajectoryOptimizer
+from src.result import TrajectoryResult
 
 def run_experiment(config):
     model = PINN(**config['pinn'])  # Build the PINN

@@ -1,6 +1,6 @@
-import torch
-import functools
 #%%
+import torch
+
 class TrajectoryOptimizer:
     """" Class to optimize the trajectory of a spacecraft using a physics-informed neural network (PINN) denoted in the model attribute.
     The optimizer uses the PINN to compute the gravity and thrust forces acting on the spacecraft, and then 
@@ -115,3 +115,4 @@ class TrajectoryOptimizer:
             self.loss_physics.backward()
             return self.loss_physics
         
+# %%

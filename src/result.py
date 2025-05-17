@@ -1,5 +1,5 @@
 import numpy as np
-from optimizer import TrajectoryOptimizer
+from src.optimizer import TrajectoryOptimizer
 
 class TrajectoryResult:
     """Class to extract and store the results of the trajectory optimization."""
@@ -10,9 +10,9 @@ class TrajectoryResult:
         self.t = traj_opt.t.detach().numpy()
         self.t_total = traj_opt.t_total.item()
 
-        self.ao = traj_opt.ao_xyzgm.detach().numpy()
+        self.ao = traj_opt.ao_rgm.detach().numpy()
         self.r0 = traj_opt.r0.detach().numpy()
-        self.r1 = traj_opt.r1.detach().numpy()
+        self.rN = traj_opt.rN.detach().numpy()
 
         self.r = traj_opt.r.detach().numpy()
         self.v = traj_opt.v.detach().numpy()
