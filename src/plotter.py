@@ -63,12 +63,10 @@ class TrajectoryPlotter:
     def _plot_magnitude_single(self):
         pass
 
-    def _plot_traj_2d_single(self, ax, label, result, linestyle, color, quiver_scale):
+    def _plot_traj_2d_single(self, ax, label, result, linestyle, color, quiver_scale=20):
 
         # Plot trajectory and start/end points
         ax.plot(result.r[:, 0], result.r[:, 1], linestyle=linestyle, color=color, label=label)
-        ax.plot(result.r0[0], result.r0[1], 'o', color='red', label=r'$r(t=0)$')
-        ax.plot(result.rN[0], result.rN[1], 'x', color='red', label=r'$r(t=1)$')
         ax.set_xlabel('x')
         ax.set_ylabel('y')
 
@@ -88,7 +86,8 @@ class TrajectoryPlotter:
         for label, exp in self.experiments.items():
             self._plot_traj_2d_single(ax, label, exp['result'], exp['linestyle'], exp['color'], exp['quiver_scale'])
         
-        print(exp['result'].ao)
+        ax.plot(exp['result'].r0[0], exp['result'].r0[1], 'o', color='red', label=r'$r(t=0)$')
+        ax.plot(exp['result'].rN[0], exp['result'].rN[1], 'x', color='red', label=r'$r(t=1)$')
         self._plot_masses_2d(ax, exp['result'].ao)
         ax.set_aspect('equal')
         ax.legend(loc='best')
@@ -98,10 +97,10 @@ class TrajectoryPlotter:
         plt.show()
 
 
-    def _plot_masses_2d(ax, ao, planet_size=200):
+    def _plot_masses_2d(self, ax, ao, planet_size=200):
         colors = ['#006400', '#228B22', '#6B8E23']
         for i, (x, y, m) in enumerate(ao):
-            ax.scatter(x, y, s=m*planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={ao[2]}$')
+            ax.scatter(x, y, s=m*planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={m}$')
                
 
     def plot_traj_3d(self):

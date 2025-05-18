@@ -22,14 +22,15 @@ position2d_config = {
         "rN": xN_2d,
         "opt_adam": partial(torch.optim.Adam, lr=1e-3),
         "opt_lbfgs": partial(torch.optim.LBFGS, max_iter=10, lr=0.1),
-        "n_adam": 0,
-        "n_lbfgs": 200,
+        "n_adam": 100,
+        "n_lbfgs": 0,
         "w_physics": 1,
         "w_bc": 0,
     },
     "plotting":{
         "linestyle": "solid",
         "color": "blue",
+        "quiver_scale": 20,
     }
 }    
 
@@ -51,8 +52,8 @@ vanilla2d_config = {
         "rN": xN_2d,
         "opt_adam": partial(torch.optim.Adam, lr=1e-3),
         "opt_lbfgs": partial(torch.optim.LBFGS, max_iter=10, lr=0.1),
-        "n_adam": 0,
-        "n_lbfgs": 10,
+        "n_adam": 100,
+        "n_lbfgs": 0,
         "w_physics": 1.,
         "w_bc": 3.5,
     },
