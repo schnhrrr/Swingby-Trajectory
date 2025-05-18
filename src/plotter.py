@@ -8,6 +8,14 @@ import numpy as np
 import random
 from src.result import TrajectoryResult
 
+plt.rcParams.update({
+    "text.usetex": False,
+    "mathtext.fontset": "cm",
+    "font.family": "serif",
+    "axes.unicode_minus": True,
+    "font.size":11
+})
+
 # Developing
 from config.config_2d import position2d_config, vanilla2d_config
 from src.runner import run_experiment
@@ -52,17 +60,46 @@ class TrajectoryPlotter:
     def get_random_hex_color(self):
         return "#{:06x}".format(random.randint(0, 0xFFFFFF))
     
-    
+    def _generate_fig_name(self):
+        return "_".join([f"{k}" for k, _ in self.experiments.items()]) 
 
     def _plot_traj_3d_single(self):
         pass
+
+    def plot_thrust(self):
+        self.fig_thrust, self.ax_thrust = plt.subplots(figsize=self.figsize)
+        fig, ax = self.fig_thrust, self.ax_thrust
+
+        for label, exp in self.experiments.items():
+            result = exp['result']
+            ax.plot(result.t, result.T_mag, linestyle='solid', color=exp['color'], label=label)
+            ax.set_xlabel('Normalized time')
+            ax.set_ylabel('Thrust magnitude')
+            ax.set_xlim(0, 1)
+
+        ax.legend(loc='best')
+        fig.tight_layout()
+        fig.savefig(self._generate_fig_name() + '_thrust.png')
+        plt.show()
+
+    def plot_gravity(self):
+        self.fig_gravity, self.ax_gravity = plt.subplots(figsize=self.figsize)
+        fig, ax = self.fig_gravity, self.ax_gravity
+
+        for label, exp in self.experiments.items():
+            result = exp['result']
+            ax.plot(result.t, result.a_mag, linestyle='solid', color=exp['color'], label=label+' Required Force Magnitude')
+            ax.plot(result.t, result.G_mag, linestyle='dashed', color=exp['color'], label=label+' Gravity')
+            ax.set_xlabel('Normalized time')
+            ax.set_ylabel('Gravity / Force magnitude')
+            ax.set_xlim(0, 1)
+
+        ax.legend(loc='best')
+        fig.tight_layout()
+        fig.savefig(self._generate_fig_name() + '_gravity.png')
+        plt.show()
+
     
-    def _plot_loss_single(self):
-        pass
-
-    def _plot_magnitude_single(self):
-        pass
-
     def _plot_traj_2d_single(self, ax, label, result, linestyle, color, quiver_scale=20):
 
         # Plot trajectory and start/end points
@@ -92,26 +129,48 @@ class TrajectoryPlotter:
         ax.set_aspect('equal')
         ax.legend(loc='best')
         fig.tight_layout()
-        exp_str = "_".join([f"{k}" for k, _ in self.experiments.items()]) + 'traj2d.png'
-        fig.savefig(exp_str)
+        fig.savefig(self._generate_fig_name() + '_traj2d.png')
         plt.show()
-
 
     def _plot_masses_2d(self, ax, ao, planet_size=200):
         colors = ['#006400', '#228B22', '#6B8E23']
         for i, (x, y, m) in enumerate(ao):
             ax.scatter(x, y, s=m*planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={m}$')
                
-
     def plot_traj_3d(self):
         pass
 
-    def plot_loss(self):
-        pass
+    def plot_loss(self, x_lim=None):
+        self.fig_loss, self.ax_loss = plt.subplots(figsize=self.figsize)
+        fig, ax = self.fig_loss, self.ax_loss
 
-    def plot_magnitude(self):
-        pass
+        for label, exp in self.experiments.items():
+            result = exp['result']
+            ax.plot(result.loss, linestyle='solid', label=label+r' Total Loss')
+            if result.loss_bc:
+                ax.plot(result.loss_bc, linestyle='solid', label=label+r' $\omega_{BC}$$L_{BC}$')
+            if result.loss_physics:
+                ax.plot(result.loss_physics, linestyle='solid', label=label+r' $\omega_P$$L_{P}$')
+            ax.set_xlabel('Training Epochs')
+            ax.set_ylabel('Loss')
+            ax.set_yscale('log')
+        if x_lim:
+            ax.set_xlim(0, x_lim) 
+        else:
+            max_len = max([len(exp['result'].loss) for exp in self.experiments.values()])
+            ax.set_xlim(0, max_len)
+        ax.legend(loc='best')
+        fig.tight_layout()
+        fig.savefig(self._generate_fig_name() + '_loss.png')
+        plt.show()
+
     
     def plot_all(self):
-        pass
+        if self.dim == 2:
+            self.plot_traj_2d()
+        elif self.dim == 3:
+            self.plot_traj_3d()
+        self.plot_loss()
+        self.plot_thrust()
+        self.plot_gravity()
 # %%
