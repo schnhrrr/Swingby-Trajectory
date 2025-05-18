@@ -11,8 +11,8 @@ class TrajectoryResult:
         self.t_total = traj_opt.t_total.item()
 
         self.ao = traj_opt.ao_rgm.detach().numpy()
-        self.r0 = traj_opt.r0.detach().numpy()
-        self.rN = traj_opt.rN.detach().numpy()
+        self.r0 = traj_opt.r0.detach().numpy().flatten()
+        self.rN = traj_opt.rN.detach().numpy().flatten()
 
         self.r = traj_opt.r.detach().numpy()
         self.v = traj_opt.v.detach().numpy()
