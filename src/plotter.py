@@ -1,8 +1,3 @@
-#%%
-import os
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 import matplotlib.pyplot as plt
 import numpy as np
 import random
@@ -15,13 +10,6 @@ plt.rcParams.update({
     "axes.unicode_minus": True,
     "font.size":11
 })
-
-# Developing
-from config.config_2d import position2d_config, vanilla2d_config
-from src.runner import run_experiment
-results = []
-for exp in [position2d_config, vanilla2d_config]:
-    results.append(run_experiment(exp))
 
 class TrajectoryPlotter:
 
@@ -63,9 +51,12 @@ class TrajectoryPlotter:
     def _generate_fig_name(self):
         return "_".join([f"{k}" for k, _ in self.experiments.items()]) 
 
-    def _plot_traj_3d_single(self):
-        pass
-
+    def _get_quiver_data(self, result, step=10):
+        r_q = result.r[::step, :]
+        G_q = result.G[::step, :]
+        T_q = result.T[::step, :]
+        return r_q, G_q, T_q
+    
     def plot_thrust(self):
         self.fig_thrust, self.ax_thrust = plt.subplots(figsize=self.figsize)
         fig, ax = self.fig_thrust, self.ax_thrust
@@ -99,33 +90,77 @@ class TrajectoryPlotter:
         fig.savefig(self._generate_fig_name() + '_gravity.png')
         plt.show()
 
-    
-    def _plot_traj_2d_single(self, ax, label, result, linestyle, color, quiver_scale=20):
+    def _plot_traj_3d_projection(self):
+        
+        self.fig_traj2d, self.ax_traj2d = plt.subplots(2,2, figsize=self.figsize)
+        fig, ax = self.fig_traj2d, self.ax_traj2d
+        
+        for label, exp in self.experiments.items():
+            res, color, qs = exp['result'], exp['color'], exp['quiver_scale']
+            x, y, z = res.r[:,0], res.r[:,1], res.r[:,2]
+            ax[0,0].plot(x, y, label='label') # (x,y)
+            ax[0,1].plot(x, z) # (x,z)
+            ax[1,0].plot(y, z) # (y,z)
 
-        # Plot trajectory and start/end points
-        ax.plot(result.r[:, 0], result.r[:, 1], linestyle=linestyle, color=color, label=label)
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
+            # Plotting gravity and thrust arrows
+            r_q, G_q, T_q = self._get_quiver_data(res)
+            ax[0,0].quiver(r_q[:,0], r_q[:,1], G_q[:,0], G_q[:,1], color=color, scale=self.quiver_scale, label=rf'Gravity/{qs}')
+            ax[0,0].quiver(r_q[:,0], r_q[:,1], T_q[:,0], T_q[:,1], color='k',scale=self.quiver_scale, label=rf'Thrust/{qs}')
+            ax[0,1].quiver(r_q[:,0], r_q[:,2], G_q[:,0], G_q[:,2], color=color, scale=self.quiver_scale, label=f'Gravity/{qs}')
+            ax[0,1].quiver(r_q[:,0], r_q[:,2], T_q[:,0], T_q[:,2], color='k', scale=self.quiver_scale, label=f'Thrust/{qs}')
+            ax[1,0].quiver(r_q[:,1], r_q[:,2], G_q[:,1], G_q[:,2], color=color, scale=self.quiver_scale, label=f'Gravity/{qs}')
+            ax[1,0].quiver(r_q[:,1], r_q[:,2], T_q[:,1], T_q[:,2], color='k', scale=self.quiver_scale, label=f'Thrust/{qs}')
 
-        # Plotting gravity and thrust arrows
-        step = len(result.r) // 10
-        r_q = result.r[::step, :]
-        G_q = result.G[::step, :]
-        T_q = result.T[::step, :]
-        ax.quiver(r_q[:, 0], r_q[:, 1], G_q[:, 0], G_q[:, 1], color='k', scale=quiver_scale, label=f'Gravity/{quiver_scale}')
-        ax.quiver(r_q[:, 0], r_q[:, 1], T_q[:, 0], T_q[:, 1], color='#FFA500', scale=quiver_scale, label=f'Thrust/{quiver_scale}')
+        # BC (x,y)
+        ax[0,0].scatter(res.r0[:2],color='r',marker='o',label=r'$r(t=0)$')
+        ax[0,0].scatter(res.rN[:2],color='r',marker='x',label=r'$r(t=1)$')
+        ax[0,0].set_xlabel('x')
+        ax[0,0].set_ylabel('y')
+        # BC (x,z)
+        ax[0,1].scatter(res.r0[0],res.r0[2],color='r',marker='o',label=r'$r(t=0)$')
+        ax[0,1].scatter(res.rN[0],res.rN[2],color='r',marker='x',label=r'$r(t=1)$')
+        ax[0,1].set_xlabel('x')
+        ax[0,1].set_ylabel('z')
+        # BC (y,z)
+        ax[1,0].scatter(res.r0[1],res.r0[2],color='r',marker='o',label=r'$r(t=0)$')
+        ax[1,0].scatter(res.rN[1],res.rN[2],color='r',marker='x',label=r'$r(t=1)$')
+        ax[1,0].set_xlabel('y')
+        ax[1,0].set_ylabel('z')
+
+        # Legend
+        self._plot_masses_3d(ax, res.ao, projection='2d')
+        h, l = ax[0,0].get_legend_handles_labels()
+        ax[1,1].legend(h, l, loc='center')
+        ax[1,1].set_frame_on(False)
+        ax[1,1].set_xticks([])
+        ax[1,1].set_yticks([])
+
+        plt.tight_layout()
+        plt.show()
+        fig.savefig(self._generate_fig_name+'traj2d.png')
 
     def plot_traj_2d(self):
+        if self.dim == 3:
+            return self._plot_traj_3d_projection()
         
         self.fig_traj2d, self.ax_traj2d = plt.subplots(figsize=self.figsize)
         fig, ax = self.fig_traj2d, self.ax_traj2d
 
         for label, exp in self.experiments.items():
-            self._plot_traj_2d_single(ax, label, exp['result'], exp['linestyle'], exp['color'], exp['quiver_scale'])
-        
+            # Plot trajectory and start/end points
+            result, color, linestyle, quiver_scale = exp['result'], exp['color'], exp['linestyle'], exp['quiver_scale']
+            ax.plot(result.r[:, 0], result.r[:, 1], linestyle=linestyle, color=color, label=label)
+            
+            # Plotting gravity and thrust arrows
+            r_q, G_q, T_q = self._get_quiver_data(result)
+            ax.quiver(r_q[:, 0], r_q[:, 1], G_q[:, 0], G_q[:, 1], color=color, scale=quiver_scale, label=f'Gravity/{quiver_scale}')
+            ax.quiver(r_q[:, 0], r_q[:, 1], T_q[:, 0], T_q[:, 1], color='k', scale=quiver_scale, label=f'Thrust/{quiver_scale}')
+
         ax.plot(exp['result'].r0[0], exp['result'].r0[1], 'o', color='red', label=r'$r(t=0)$')
         ax.plot(exp['result'].rN[0], exp['result'].rN[1], 'x', color='red', label=r'$r(t=1)$')
         self._plot_masses_2d(ax, exp['result'].ao)
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
         ax.set_aspect('equal')
         ax.legend(loc='best')
         fig.tight_layout()
@@ -136,9 +171,39 @@ class TrajectoryPlotter:
         colors = ['#006400', '#228B22', '#6B8E23']
         for i, (x, y, m) in enumerate(ao):
             ax.scatter(x, y, s=m*planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={m}$')
+
+    def _plot_masses_3d(self, ax, ao, projection=None, planet_size=200):
+        colors = ['#006400', '#228B22', '#6B8E23']
+        for i, (x, y, z, m) in enumerate(ao):
+            if projection == '3d':
+                ax.scatter(x, y, z, s=m*planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={m}$')
+            elif projection == '2d':
+                ax[0,0].scatter(ao[0], ao[1], s=ao[3]*self.planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={ao[3]}$')
+                ax[0,1].scatter(ao[0], ao[2], s=ao[3]*self.planet_size, color=colors[i], marker='o', label=fr'$GM_{i+1}={ao[3]}$')
+                ax[1,0].scatter(ao[1], ao[2], s=ao[3]*self.planet_size, color=colors[i], marker='o', label=f'$GM_{i+1}={ao[3]}$')
                
-    def plot_traj_3d(self):
-        pass
+    def plot_traj_3d(self, plot_quiver=True):
+        self.fig_3d, self.ax_3d = plt.subplots(figsize=(6,6))
+        fig, ax = self.fig_3d, self.ax_3d
+        ax = fig.add_subplot(111, projection='3d')
+
+        for label, exp in self.experiments.items():
+            res = exp['result']
+            r_q, G_q, T_q = self._get_quiver_data(res)
+            self.ax3d.plot3D(res.r[:,0], res.r[:,1], res.r[:2], label=label, c='#1f77b4')
+            if plot_quiver:
+                self.ax3d.quiver(r_q[:,0], r_q[:,1], r_q[:,2], G_q[:,0], G_q[:,1], G_q[:,2], color=exp['color'], label=f'Gravity')
+                self.ax3d.quiver(r_q[:,0], r_q[:,1], r_q[:,2], T_q[:,0], T_q[:,1], T_q[:,2], color='k', label=f'Thrust')
+            self.ax3d.set_xlabel(r'$x$')
+            self.ax3d.set_ylabel(r'$y$')
+            self.ax3d.set_zlabel(r'$z$')
+
+        ax.scatter(*res.r0, marker='o', color='red', label=r'$r(t=0)$')
+        ax.scatter(*res.rN, marker='x', color='red', label=r'$r(t=1)$')
+
+        self._plot_masses_3d(ax, res.ao, projection='3d')
+        self.ax3d.legend(loc='upper center', ncol=3) 
+        self.fig_3d.savefig('traj3d.png')
 
     def plot_loss(self, x_lim=None):
         self.fig_loss, self.ax_loss = plt.subplots(figsize=self.figsize)
@@ -164,11 +229,10 @@ class TrajectoryPlotter:
         fig.savefig(self._generate_fig_name() + '_loss.png')
         plt.show()
 
-    
     def plot_all(self):
-        if self.dim == 2:
-            self.plot_traj_2d()
-        elif self.dim == 3:
+        
+        self.plot_traj_2d()
+        if self.dim == 3:
             self.plot_traj_3d()
         self.plot_loss()
         self.plot_thrust()
