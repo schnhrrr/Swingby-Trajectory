@@ -5,6 +5,7 @@ from config.shared_parameters import x0_2d, xN_2d, ao_2d, t_colloc, t_total
 
 position2d_config = {
     "label": "Position-transformed",
+    "seed": 2809,
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 2,
@@ -14,7 +15,6 @@ position2d_config = {
         "output_transform_fn": partial(position_2d, x0=x0_2d, xN=xN_2d),
     },
     "optimizer":{
-        "seed": 2809,
         "ao_rgm": ao_2d,
         "t_colloc": t_colloc,
         "t_total": t_total,
@@ -36,6 +36,7 @@ position2d_config = {
 
 vanilla2d_config = {
     "label": "Vanilla",
+    "seed": 2809,
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 2,
@@ -45,7 +46,6 @@ vanilla2d_config = {
         "output_transform_fn": None,
     },
     "optimizer":{
-        "seed": 2809,
         "ao_rgm": ao_2d,
         "t_colloc": t_colloc,
         "t_total": t_total,

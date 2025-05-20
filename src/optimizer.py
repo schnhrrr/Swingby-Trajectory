@@ -22,8 +22,7 @@ class TrajectoryOptimizer:
 
     """
     # TODO: add typehints
-    def __init__(self, model, seed, ao_rgm, t_colloc, t_total, r0, rN, opt_adam, opt_lbfgs, n_adam=0, n_lbfgs=100, w_physics=1, w_bc=0):
-        torch.manual_seed(seed)
+    def __init__(self, model, ao_rgm, t_colloc, t_total, r0, rN, opt_adam, opt_lbfgs, n_adam=0, n_lbfgs=100, w_physics=1, w_bc=0):
         self.model = model  # Pinn
         self.eps = 1e-8
         self.lbfgs = opt_lbfgs

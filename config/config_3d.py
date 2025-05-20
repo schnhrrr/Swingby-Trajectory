@@ -5,6 +5,7 @@ from config.shared_parameters import x0_3d, xN_3d, ao_3d, t_colloc, t_total
 
 position3d_config = {
     "label": "Position-transformed",
+    "seed": 123,
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 3,
@@ -14,7 +15,6 @@ position3d_config = {
         "output_transform_fn": partial(position_3d, x0=x0_3d, xN=xN_3d),
     },
     "optimizer":{
-        "seed": 2809,
         "ao_rgm": ao_3d,
         "t_colloc": t_colloc,
         "t_total": t_total,
@@ -22,8 +22,8 @@ position3d_config = {
         "rN": xN_3d,
         "opt_adam": partial(torch.optim.Adam, lr=1e-3),
         "opt_lbfgs": partial(torch.optim.LBFGS, max_iter=10, lr=0.1),
-        "n_adam": 0,
-        "n_lbfgs": 200,
+        "n_adam": 1_000,
+        "n_lbfgs": 0,
         "w_physics": 1.,
         "w_bc": 0,
     },
@@ -36,6 +36,7 @@ position3d_config = {
 
 vanilla3d_config = {
     "label": "Vanilla",
+    "seed": 123,
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 3,
@@ -45,7 +46,6 @@ vanilla3d_config = {
         "output_transform_fn": None,
     },
     "optimizer":{
-        "seed": 2809,
         "ao_rgm": ao_3d,
         "t_colloc": t_colloc,
         "t_total": t_total,
@@ -53,8 +53,8 @@ vanilla3d_config = {
         "rN": xN_3d,
         "opt_adam": partial(torch.optim.Adam, lr=1e-3),
         "opt_lbfgs": partial(torch.optim.LBFGS, max_iter=10, lr=0.1),
-        "n_adam": 5_000,
-        "n_lbfgs": 1_000,
+        "n_adam": 1_000,
+        "n_lbfgs": 0,
         "w_physics": 1.,
         "w_bc": 3.5,
     },

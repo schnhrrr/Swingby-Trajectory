@@ -15,7 +15,7 @@ class PINN(nn.Module):
     def __init__(self, N_INPUT, N_OUTPUT, N_NEURONS, N_LAYERS, input_transform_fn=None, output_transform_fn=None):
         super().__init__()
         self.activation = nn.Tanh
-        self.in_tranform_fn = input_transform_fn  # custom function
+        self.in_transform_fn = input_transform_fn  # custom function
         self.out_transform_fn = output_transform_fn  # custom function
         self.fci = nn.Sequential(nn.Linear(N_INPUT, N_NEURONS), self.activation())
         self.fch = nn.Sequential(*[
@@ -26,10 +26,11 @@ class PINN(nn.Module):
 
     def forward(self, t, **kwargs):
         x = self.fci(t)
-        if self.in_tranform_fn:
-            x = self.in_tranform_fn(t, x, **kwargs)
+        if self.in_transform_fn:
+            x = self.in_transform_fn(t, x, **kwargs)
         x = self.fch(x)
         x = self.fco(x)
         if self.out_transform_fn:
             return self.out_transform_fn(t, x, **kwargs)
         return x
+    

@@ -15,4 +15,3 @@ for config in [position3d_config, vanilla3d_config]:
 from src.plotter import TrajectoryPlotter
 plotter = TrajectoryPlotter(results, dim=3, figsize=(6, 6))
 plotter.plot_all()
-# %%
