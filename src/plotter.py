@@ -70,7 +70,8 @@ class TrajectoryPlotter:
 
         ax.legend(loc='best')
         fig.tight_layout()
-        fig.savefig(self._generate_fig_name() + '_thrust.png')
+        fig.savefig(self._generate_fig_name() + '_thrust.pdf', bbox_inches='tight'
+, pad_inches=0.05)
         plt.show()
 
     def plot_gravity(self):
@@ -87,7 +88,7 @@ class TrajectoryPlotter:
 
         ax.legend(loc='best')
         fig.tight_layout()
-        fig.savefig(self._generate_fig_name() + '_gravity.png')
+        fig.savefig(self._generate_fig_name() + '_gravity.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
 
     def _plot_traj_3d_projection(self):
@@ -137,7 +138,7 @@ class TrajectoryPlotter:
 
         plt.tight_layout()
         plt.show()
-        fig.savefig(self._generate_fig_name() +'_traj2d.png')
+        fig.savefig(self._generate_fig_name() +'_traj2d.pdf', bbox_inches='tight', pad_inches=0.05)
 
     def plot_traj_2d(self):
         if self.dim == 3:
@@ -162,9 +163,9 @@ class TrajectoryPlotter:
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         ax.set_aspect('equal')
-        ax.legend(loc='best')
+        ax.legend(loc='lower right', ncol=2)
         fig.tight_layout()
-        fig.savefig(self._generate_fig_name() + '_traj2d.png')
+        fig.savefig(self._generate_fig_name() + '_traj2d.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
 
     def _plot_masses_2d(self, ax, ao, planet_size=200):
@@ -203,7 +204,8 @@ class TrajectoryPlotter:
 
         self._plot_masses_3d(ax, res.ao, projection='3d')
         ax.legend(loc='upper center', ncol=3) 
-        self.fig_3d.savefig(self._generate_fig_name()+'_traj3d.png')
+        self.fig_3d.savefig(self._generate_fig_name()+'_traj3d.pdf', bbox_inches='tight', pad_inches=0.05)
+        plt.show()
 
     def plot_loss(self, x_lim=None):
         self.fig_loss, self.ax_loss = plt.subplots(figsize=self.figsize)
@@ -226,7 +228,7 @@ class TrajectoryPlotter:
             ax.set_xlim(0, max_len)
         ax.legend(loc='best')
         fig.tight_layout()
-        fig.savefig(self._generate_fig_name() + '_loss.png')
+        fig.savefig(self._generate_fig_name() + '_loss.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
 
     def plot_all(self):
