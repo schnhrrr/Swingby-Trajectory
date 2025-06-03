@@ -6,6 +6,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config.config_2d import position2d_config, vanilla2d_config
 from src.runner import run_experiment
 
+vanilla2d_config['optimizer']['w_bc'] = 2.65
+
 results = []
 for config in [position2d_config, vanilla2d_config]:
     result = run_experiment(config)

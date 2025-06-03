@@ -9,7 +9,8 @@ from src.runner import run_experiment
 position3d_config['optimizer']['n_adam'] = 1000
 position3d_config['optimizer']['n_lbfgs'] = 500
 vanilla3d_config['optimizer']['n_adam'] = 2_000
-vanilla3d_config['optimizer']['n_lbfgs'] = 1_000
+vanilla3d_config['optimizer']['n_lbfgs'] = 500
+vanilla3d_config['optimizer']['w_bc'] = 68.36
 
 results = []
 for config in [position3d_config, vanilla3d_config]:
