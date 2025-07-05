@@ -49,7 +49,7 @@ class TrajectoryPlotter:
         return "#{:06x}".format(random.randint(0, 0xFFFFFF))
     
     def _generate_fig_name(self):
-        return "_".join([f"{k}" for k, _ in self.experiments.items()]) + str(self.dim) + 'd'
+        return "_".join([f"{k.strip()}" for k, _ in self.experiments.items()]) + str(self.dim) + 'd'
 
     def _get_quiver_data(self, result, step=10):
         r_q = result.r[::step, :]
@@ -70,8 +70,7 @@ class TrajectoryPlotter:
 
         ax.legend(loc='best')
         fig.tight_layout()
-        fig.savefig(self._generate_fig_name() + '_thrust.pdf', bbox_inches='tight'
-, pad_inches=0.05)
+        fig.savefig(self._generate_fig_name() + '_thrust.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
 
     def plot_gravity(self):

@@ -58,24 +58,19 @@ class TrajectoryOptimizer:
                 self.G[:,i] -= ao[-1] * r_diff[:,i] / denominator
 
     def _compute_thrust(self):
-        
         self.v = torch.stack([torch.autograd.grad(self.r[:, i], self.t, grad_outputs=torch.ones_like(self.r[:, i]), create_graph=True)[0].squeeze(-1)
                  for i in range(self.dims)], dim=1) / self.t_total
-        
         self.a = torch.stack([torch.autograd.grad(self.v[:, i], self.t, grad_outputs=torch.ones_like(self.v[:, i]), create_graph=True)[0].squeeze(-1)
-                 for i in range(self.dims) ], dim=1) / self.t_total
-            
+                 for i in range(self.dims)], dim=1) / self.t_total
         self._compute_gravitational_force()
         self.T = self.a - self.G 
         
 
     def _train_model(self):
         import functools
-
         # Instantiate once
         if isinstance(self.adam, functools.partial):
             adam_optimizer = self.adam(self.model.parameters(), **getattr(self.adam, 'keywords', {}))
-
         if isinstance(self.lbfgs, functools.partial):
             lbfgs_optimizer = self.lbfgs(self.model.parameters(), **getattr(self.lbfgs, 'keywords', {}))
 
