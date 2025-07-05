@@ -1,6 +1,6 @@
 from functools import partial
 import torch
-from config.transform_functions import position_2d, kinematic_2d
+from config.transform_functions import position_fn, kinematic_fn
 from config.shared_parameters import x0_2d, xN_2d, ao_2d, t_colloc, t_total
 
 position2d_config = {
@@ -12,7 +12,7 @@ position2d_config = {
         "N_NEURONS": 50,
         "N_LAYERS": 3,
         "input_transform_fn": None,
-        "output_transform_fn": partial(position_2d, x0=x0_2d, xN=xN_2d),
+        "output_transform_fn": partial(position_fn, x0=x0_2d, xN=xN_2d),
     },
     "optimizer":{
         "ao_rgm": ao_2d,

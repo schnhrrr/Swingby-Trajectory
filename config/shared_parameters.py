@@ -15,5 +15,5 @@ ao_3d = np.array([[-0.5, -1., 0., 0.5],[-0.2, 0.4, 0., 1.0],[ 0.8, 0.3, 0., 0.5]
 x0_3d = torch.tensor([[-1., -1., 0.]])
 xN_3d = torch.tensor([[1., 1., 0.]])
 
-v0_3d = torch.tensor([[ 0.,  0.,  1.]])
-vN_3d = torch.tensor([[ 0.,  0., -1.]])
+v0_3d = torch.tensor([[ 1.,  1.,  1.]])
+vN_3d = torch.tensor([[ 1.,  1., -1.]])
