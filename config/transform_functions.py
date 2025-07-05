@@ -1,5 +1,3 @@
-import torch
-
 def R(t, x0, xN):
     return t*(xN - x0) + x0
 
