@@ -9,8 +9,7 @@ def run_experiment(config):
     model = PINN(**config['pinn'])  # Initialize the model
 
     # Register extra parameters if provided
-    extra_parameters = config['pinn'].get('extra_parameters', {})
-    if extra_parameters:
+    if extra_parameters := config['pinn'].get('extra_parameters', {}):
         for name, param in extra_parameters.items():
             model.register_parameter(str(name), param)
             config['optimizer'][name] = param  # Add to optimizer config

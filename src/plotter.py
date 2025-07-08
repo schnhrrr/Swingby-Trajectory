@@ -70,6 +70,11 @@ class TrajectoryPlotter:
         T_q = result.T[::step, :]
         return r_q, G_q, T_q
     
+    def _set_time_axis_labels(self, ax, ylabel):
+        ax.set_xlabel('Normalized time')
+        ax.set_ylabel(ylabel)
+        ax.set_xlim(0, 1)
+
     def plot_thrust(self):
         self.fig_thrust, self.ax_thrust = plt.subplots(figsize=self.figsize)
         fig, ax = self.fig_thrust, self.ax_thrust
@@ -77,11 +82,8 @@ class TrajectoryPlotter:
         for label, exp in self.experiments.items():
             result = exp['result']
             ax.plot(result.t, result.T_mag, linestyle='solid', color=exp['color'], label=label)
-            ax.set_xlabel('Normalized time')
-            ax.set_ylabel('Thrust magnitude')
-            ax.set_xlim(0, 1)
+        self._set_time_axis_labels(ax, 'Thrust magnitude')
 
-        ax.legend(loc='best')
         fig.tight_layout()
         fig.savefig(f'{self._generate_fig_name()}_thrust.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
@@ -94,11 +96,8 @@ class TrajectoryPlotter:
             result = exp['result']
             ax.plot(result.t, result.a_mag, linestyle='solid', color=exp['color'], label=f'{label} RFM')
             ax.plot(result.t, result.G_mag, linestyle='dashed', color=exp['color'], label=f'{label} Gravity')
-            ax.set_xlabel('Normalized time')
-            ax.set_ylabel('Gravity / Force magnitude')
-            ax.set_xlim(0, 1)
+        self._set_time_axis_labels(ax, 'Gravity / Required Force magnitude')
 
-        ax.legend(loc='best')
         fig.tight_layout()
         fig.savefig(f'{self._generate_fig_name()}_gravity.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
@@ -238,7 +237,6 @@ class TrajectoryPlotter:
         else:
             max_len = max(len(exp['result'].loss) for exp in self.experiments.values())
             ax.set_xlim(0, max_len)
-        ax.legend(loc='best')
         fig.tight_layout()
         fig.savefig(f'{self._generate_fig_name()}_loss.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
