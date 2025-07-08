@@ -13,7 +13,7 @@ plt.rcParams.update({
 
 class TrajectoryPlotter:
 
-    def __init__(self, experiments, dim=None, figsize=(8,8)):
+    def __init__(self, experiments, dim=None, figsize=(8,8), color_palette_fn=None):
         """
         Class to plot the results of the trajectory optimization.
         **experiments: keyword args where key is the name (str), and value is a dict:
@@ -26,14 +26,20 @@ class TrajectoryPlotter:
         self.dim = dim
         self.figsize = figsize
         self.experiments = {}
-        
+
         if experiments:
-            for exp in experiments:
+
+            if color_palette_fn is None:
+                self.colors = self.get_color_palette(experiments.__len__())
+            else:
+                self.colors = color_palette_fn(np.linspace(0, 1, self.experiments.__len__()))
+            
+            for i, exp in enumerate(experiments):
                 self.add_experiment(
                     label=exp['label'],
                     result=exp['result'],
                     linestyle=exp.get('linestyle', '-'),
-                    color=exp.get('color', None),
+                    color=exp.get('color', self.colors[i]),
                     quiver_scale = exp.get('quiver_scale', 20)
                 )
     
@@ -44,6 +50,9 @@ class TrajectoryPlotter:
                 "color": color if color is not None else self.get_random_hex_color(),
                 "quiver_scale": quiver_scale
             }
+
+    def get_color_palette(self, num_colors):
+        return plt.cm.viridis(np.linspace(0, 0.9, num_colors))
 
     def get_random_hex_color(self):
         return "#{:06x}".format(random.randint(0, 0xFFFFFF))
@@ -70,7 +79,7 @@ class TrajectoryPlotter:
 
         ax.legend(loc='best')
         fig.tight_layout()
-        fig.savefig(self._generate_fig_name() + '_thrust.pdf', bbox_inches='tight', pad_inches=0.05)
+        fig.savefig(f'{self._generate_fig_name()}_thrust.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
 
     def plot_gravity(self):
@@ -79,15 +88,15 @@ class TrajectoryPlotter:
 
         for label, exp in self.experiments.items():
             result = exp['result']
-            ax.plot(result.t, result.a_mag, linestyle='solid', color=exp['color'], label=label+' Required Force Magnitude')
-            ax.plot(result.t, result.G_mag, linestyle='dashed', color=exp['color'], label=label+' Gravity')
+            ax.plot(result.t, result.a_mag, linestyle='solid', color=exp['color'], label=f'{label} RFM')
+            ax.plot(result.t, result.G_mag, linestyle='dashed', color=exp['color'], label=f'{label} Gravity')
             ax.set_xlabel('Normalized time')
             ax.set_ylabel('Gravity / Force magnitude')
             ax.set_xlim(0, 1)
 
         ax.legend(loc='best')
         fig.tight_layout()
-        fig.savefig(self._generate_fig_name() + '_gravity.pdf', bbox_inches='tight', pad_inches=0.05)
+        fig.savefig(f'{self._generate_fig_name()}_gravity.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
 
     def _plot_traj_3d_projection(self):
@@ -137,7 +146,7 @@ class TrajectoryPlotter:
 
         plt.tight_layout()
         plt.show()
-        fig.savefig(self._generate_fig_name() +'_traj2d.pdf', bbox_inches='tight', pad_inches=0.05)
+        fig.savefig(f'{self._generate_fig_name()}_traj2d.pdf', bbox_inches='tight', pad_inches=0.05)
 
     def plot_traj_2d(self):
         if self.dim == 3:
@@ -164,7 +173,7 @@ class TrajectoryPlotter:
         ax.set_aspect('equal')
         ax.legend(loc='lower right', ncol=2)
         fig.tight_layout()
-        fig.savefig(self._generate_fig_name() + '_traj2d.pdf', bbox_inches='tight', pad_inches=0.05)
+        fig.savefig(f'{self._generate_fig_name()}_traj2d.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
 
     def _plot_masses_2d(self, ax, ao, planet_size=200):
@@ -192,8 +201,8 @@ class TrajectoryPlotter:
             r_q, G_q, T_q = self._get_quiver_data(res)
             ax.plot3D(res.r[:,0], res.r[:,1], res.r[:,2], label=label, color=exp['color'])
             if plot_quiver:
-                ax.quiver(r_q[:,0], r_q[:,1], r_q[:,2], G_q[:,0], G_q[:,1], G_q[:,2], color=exp['color'], label=f'Gravity')
-                ax.quiver(r_q[:,0], r_q[:,1], r_q[:,2], T_q[:,0], T_q[:,1], T_q[:,2], color='k', label=f'Thrust')
+                ax.quiver(r_q[:,0], r_q[:,1], r_q[:,2], G_q[:,0], G_q[:,1], G_q[:,2], color=exp['color'], label='Gravity')
+                ax.quiver(r_q[:,0], r_q[:,1], r_q[:,2], T_q[:,0], T_q[:,1], T_q[:,2], color='k', label='Thrust')
             ax.set_xlabel(r'$x$')
             ax.set_ylabel(r'$y$')
             ax.set_zlabel(r'$z$')
@@ -203,7 +212,7 @@ class TrajectoryPlotter:
 
         self._plot_masses_3d(ax, res.ao, projection='3d')
         ax.legend(loc='upper center', ncol=3) 
-        self.fig_3d.savefig(self._generate_fig_name()+'_traj3d.pdf', bbox_inches='tight', pad_inches=0.05)
+        self.fig_3d.savefig(f'{self._generate_fig_name()}_traj3d.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
 
     def plot_loss(self, x_lim=None):
@@ -212,22 +221,22 @@ class TrajectoryPlotter:
 
         for label, exp in self.experiments.items():
             result = exp['result']
-            ax.plot(result.loss, linestyle='solid', label=label+r' Total Loss')
+            ax.plot(result.loss, linestyle='solid', label=f'{label} Total Loss', color=exp['color'])
             if result.loss_bc:
-                ax.plot(result.loss_bc, linestyle='solid', label=label+r' $\omega_{BC}$$L_{BC}$')
+                ax.plot(result.loss_bc, linestyle='--', label=label+r' $\omega_{BC}$$L_{BC}$', color=exp['color'])
             if result.loss_physics:
-                ax.plot(result.loss_physics, linestyle='solid', label=label+r' $\omega_P$$L_{P}$')
+                ax.plot(result.loss_physics, linestyle='-.', label=label+r' $\omega_P$$L_{P}$', color=exp['color'])
             ax.set_xlabel('Training Epochs')
             ax.set_ylabel('Loss')
             ax.set_yscale('log')
         if x_lim:
             ax.set_xlim(0, x_lim) 
         else:
-            max_len = max([len(exp['result'].loss) for exp in self.experiments.values()])
+            max_len = max(len(exp['result'].loss) for exp in self.experiments.values())
             ax.set_xlim(0, max_len)
         ax.legend(loc='best')
         fig.tight_layout()
-        fig.savefig(self._generate_fig_name() + '_loss.pdf', bbox_inches='tight', pad_inches=0.05)
+        fig.savefig(f'{self._generate_fig_name()}_loss.pdf', bbox_inches='tight', pad_inches=0.05)
         plt.show()
 
     def plot_all(self):
