@@ -30,7 +30,5 @@ class PINN(nn.Module):
             x = self.in_transform_fn(t, x, **kwargs)
         x = self.fch(x)
         x = self.fco(x)
-        if self.out_transform_fn:
-            return self.out_transform_fn(t, x, **kwargs)
-        return x
+        return self.out_transform_fn(t, x, **kwargs) if self.out_transform_fn else x
     
