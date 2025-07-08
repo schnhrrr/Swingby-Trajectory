@@ -13,7 +13,7 @@ plt.rcParams.update({
 
 class TrajectoryPlotter:
 
-    def __init__(self, experiments, dim=None, figsize=(8,8), color_palette_fn=None):
+    def __init__(self, experiments, fig_prefix=None, dim=None, figsize=(8,8), color_palette_fn=None):
         """
         Class to plot the results of the trajectory optimization.
         **experiments: keyword args where key is the name (str), and value is a dict:
@@ -23,6 +23,7 @@ class TrajectoryPlotter:
                 'color': matplotlib color (optional)
             }
         """
+        self.prefix = fig_prefix
         self.dim = dim
         self.figsize = figsize
         self.experiments = {}
@@ -32,7 +33,7 @@ class TrajectoryPlotter:
             if color_palette_fn is None:
                 self.colors = self.get_color_palette(experiments.__len__())
             else:
-                self.colors = color_palette_fn(np.linspace(0, 1, self.experiments.__len__()))
+                self.colors = color_palette_fn(experiments.__len__())
             
             for i, exp in enumerate(experiments):
                 self.add_experiment(
@@ -58,7 +59,10 @@ class TrajectoryPlotter:
         return "#{:06x}".format(random.randint(0, 0xFFFFFF))
     
     def _generate_fig_name(self):
-        return "_".join([f"{k.strip()}" for k, _ in self.experiments.items()]) + str(self.dim) + 'd'
+        if self.prefix:
+            return self.prefix
+        else:
+            return "_".join([f"{k.strip()}" for k, _ in self.experiments.items()]) + str(self.dim) + 'd'
 
     def _get_quiver_data(self, result, step=10):
         r_q = result.r[::step, :]
