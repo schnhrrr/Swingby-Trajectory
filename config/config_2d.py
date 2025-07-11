@@ -6,6 +6,8 @@ from config.shared_parameters import x0_2d, xN_2d, ao_2d, t_colloc, t_total
 position2d_config = {
     "label": "Position-transformed",
     "seed": 2809,
+    "extra_parameters": {
+            "t_total": torch.nn.Parameter(t_total)},
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 2,
@@ -22,8 +24,8 @@ position2d_config = {
         "rN": xN_2d,
         "opt_adam": partial(torch.optim.Adam, lr=1e-3),
         "opt_lbfgs": partial(torch.optim.LBFGS, max_iter=10, lr=0.1),
-        "n_adam": 200,
-        "n_lbfgs": 200,
+        "n_adam": 1000,
+        "n_lbfgs": 500,
         "w_physics": 1.,
         "w_bc": 0,
     },
@@ -37,6 +39,8 @@ position2d_config = {
 vanilla2d_config = {
     "label": "Vanilla",
     "seed": 2809,
+    "extra_parameters": {
+            "t_total": torch.nn.Parameter(t_total)},
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 2,
