@@ -6,6 +6,8 @@ from config.shared_parameters import x0_3d, xN_3d, v0_3d, vN_3d, ao_3d, t_colloc
 position3d_config = {
     "label": "Position-transformed",
     "seed": 2809,
+    "extra_parameters": {
+            "t_total": torch.nn.Parameter(t_total)},
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 3,
@@ -37,6 +39,8 @@ position3d_config = {
 vanilla3d_config = {
     "label": "Vanilla",
     "seed": 2809,
+    "extra_parameters": {
+            "t_total": torch.nn.Parameter(t_total)},
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 3,
@@ -67,13 +71,13 @@ vanilla3d_config = {
 kinematic3d_config = {
     "label": "Kinematic-transformed",
     "seed": 2809,
+    "extra_parameters": {
+            "t_total": torch.nn.Parameter(t_total)},
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 3,
         "N_NEURONS": 50,
         "N_LAYERS": 3,
-        "extra_parameters": {
-            "t_total": torch.nn.Parameter(t_total)},
         "input_transform_fn": None,
         "output_transform_fn": partial(kinematic_fn, x0=x0_3d, xN=xN_3d, v0=v0_3d, vN=vN_3d),
     },
