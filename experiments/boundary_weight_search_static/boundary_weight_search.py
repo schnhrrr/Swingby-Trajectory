@@ -8,6 +8,7 @@ from src.runner import run_experiment
 
 vanilla2d_config['optimizer']['n_adam'] = 2000
 vanilla2d_config['optimizer']['n_lbfgs'] = 500
+del vanilla2d_config['extra_parameters']
 
 idx = []
 w_bc_list = []
