@@ -6,11 +6,20 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config.config_3d import position3d_config, vanilla3d_config
 from src.runner import run_experiment
 
+if static_experiment := False:
+    del vanilla3d_config['extra_parameters']
+    del position3d_config['extra_parameters']
+    position3d_config['optimizer']['n_adam'] = 1000
+    position3d_config['optimizer']['n_lbfgs'] = 500
+    vanilla3d_config['optimizer']['n_adam'] = 2_000
+    vanilla3d_config['optimizer']['n_lbfgs'] = 500
+    vanilla3d_config['optimizer']['w_bc'] = 68.36
+
+vanilla3d_config['optimizer']['w_bc'] = 3.58
 position3d_config['optimizer']['n_adam'] = 1000
-position3d_config['optimizer']['n_lbfgs'] = 500
+position3d_config['optimizer']['n_lbfgs'] = 700
 vanilla3d_config['optimizer']['n_adam'] = 2_000
-vanilla3d_config['optimizer']['n_lbfgs'] = 500
-vanilla3d_config['optimizer']['w_bc'] = 68.36
+vanilla3d_config['optimizer']['n_lbfgs'] = 1_500
 
 results = []
 for config in [position3d_config, vanilla3d_config]:
