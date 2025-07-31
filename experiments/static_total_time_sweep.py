@@ -12,10 +12,11 @@ from src.runner import run_experiment
 
 position3d_config['optimizer']['n_adam'] = 1000
 position3d_config['optimizer']['n_lbfgs'] = 500
+del position3d_config['extra_parameters']
 
 # Sweeping over different STATIC (non-trainable) total times
 t_total_small = [0.33, 0.5, 0.66, 0.75, 0.9, 1.0]
-t_total_medium = [1.0, 1.025, 1.05, 1.075, 1.08, 1.085]
+t_total_medium = np.linspace(1.0, 1.1, 6).tolist()
 t_total_large = [1.0, 1.25, 1.5, 1.75, 2.0, 3.0]
 
 results = {}
