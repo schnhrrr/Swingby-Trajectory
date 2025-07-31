@@ -87,7 +87,7 @@ kinematic3d_config = {
         "t_total": t_total,
         "r0": x0_3d,
         "rN": xN_3d,
-        "opt_adam": partial(torch.optim.Adam, lr=1e-4),
+        "opt_adam": partial(torch.optim.Adam, lr=1e-3),
         "opt_lbfgs": partial(torch.optim.LBFGS, max_iter=10, lr=0.1),
         "n_adam": 0,
         "n_lbfgs": 200,
