@@ -115,6 +115,10 @@ class TrajectoryPlotter:
             ax[0,1].plot(x, z, color=color) # (x,z)
             ax[1,0].plot(y, z, color=color) # (y,z)
 
+            if all(abs(z) < 1):
+                ax[0,1].set_ylim(-1, 1)
+                ax[1,0].set_ylim(-1, 1)
+
             # Plotting gravity and thrust arrows
             if plot_quiver:
                 r_q, G_q, T_q = self._get_quiver_data(res)
@@ -214,6 +218,9 @@ class TrajectoryPlotter:
             ax.set_xlabel(r'$x$')
             ax.set_ylabel(r'$y$')
             ax.set_zlabel(r'$z$')
+
+            if (abs(res.r[:,2]) < 1).all():
+                ax.set_zlim(-1, 1)
 
         ax.scatter(*res.r0, marker='o', color='red', label=r'$r(t=0)$')
         ax.scatter(*res.rN, marker='x', color='red', label=r'$r(t=1)$')
