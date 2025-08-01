@@ -1,3 +1,4 @@
+import pickle
 import torch
 from src.pinn import PINN
 from src.optimizer import TrajectoryOptimizer
@@ -20,3 +21,12 @@ def run_experiment(config):
             "result": res,
             **config.get("plotting",{}),
             "model": model}  # Return the results
+
+def export_results(results, filename):
+    with open(filename, 'wb') as f:
+        pickle.dump(results, f)
+
+def load_results(filename):
+    with open(filename, 'rb') as f:
+        results = pickle.load(f)
+    return results
