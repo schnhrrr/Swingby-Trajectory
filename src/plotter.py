@@ -115,6 +115,14 @@ class TrajectoryPlotter:
             ax[0,1].plot(x, z, color=color) # (x,z)
             ax[1,0].plot(y, z, color=color) # (y,z)
 
+            # Plottung all Start- and Endpoints for shifted BC
+            ax[0,0].scatter(*res.r0[:2],color='r',marker='o')
+            ax[0,0].scatter(*res.rN[:2],color='r',marker='x')
+            ax[0,1].scatter(res.r0[0],res.r0[2],color='r',marker='o')
+            ax[0,1].scatter(res.rN[0],res.rN[2],color='r',marker='x')
+            ax[1,0].scatter(res.r0[1],res.r0[2],color='r',marker='o')
+            ax[1,0].scatter(res.rN[1],res.rN[2],color='r',marker='x')
+
             if all(abs(z) < 1):
                 ax[0,1].set_ylim(-1, 1)
                 ax[1,0].set_ylim(-1, 1)
@@ -221,7 +229,10 @@ class TrajectoryPlotter:
 
             if (abs(res.r[:,2]) < 1).all():
                 ax.set_zlim(-1, 1)
+            ax.scatter(*res.r0, marker='o', color='red')
+            ax.scatter(*res.rN, marker='x', color='red')
 
+        # Only plot label once
         ax.scatter(*res.r0, marker='o', color='red', label=r'$r(t=0)$')
         ax.scatter(*res.rN, marker='x', color='red', label=r'$r(t=1)$')
 
