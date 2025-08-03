@@ -2,36 +2,38 @@
 import os
 import sys
 import torch
+import numpy as np
 from functools import partial
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from config.config_3d import kinematic3d_config
 from config.shared_parameters import x0_3d, xN_3d, v0_3d, vN_3d
 from config.transform_functions import kinematic_fn
-from src.runner import run_experiment
+from src.runner import run_experiment, load_results
 
-kinematic3d_config['optimizer']['n_adam'] = 50 #3000
-kinematic3d_config['optimizer']['opt_adam'] = partial(torch.optim.Adam, lr=1e-3)
-kinematic3d_config['optimizer']['n_lbfgs'] = 1
+kinematic3d_config['optimizer']['n_adam'] = 100 #3000
+kinematic3d_config['optimizer']['n_lbfgs'] = 300
 
-#v0_3d = torch.tensor([[ 1., 1., 1.]])
-#vN_3d = torch.tensor([[1., 1., -1.]])
-v0_3d = torch.tensor([[ 0.4308,  1.0814,  1.1313]])
-vN_3d = torch.tensor([[ 0.7383,  0.5656, -1.1591]])
-#v0_3d = torch.tensor([[ 0.8,  1.4,  -1.]])
-#vN_3d = torch.tensor([[ 1.2,  0.6, 1.]])
+# Results from Vanilla PINN
+v0_out = [3.0484906e-01,  1.1015986e+00,  3.8672029e-03]
+vN_out = [8.1449240e-01,  4.9920556e-01,  6.4733997e-03]
 
-import math
-sq2 = math.sqrt(2)*2
-v0_3d = torch.tensor([[sq2, sq2,0.]])
-vN_3d = torch.tensor([[sq2, sq2,0.]])
+# Calculate input from calibrated model
+a, b, c = load_results('kinematic_coeffs.pkl')
+v_in_fn = lambda v_out: min([r.real for r in np.roots([a, b, c - v_out]) if np.isreal(r)])
+
+v0_in = torch.tensor(np.array([[v_in_fn(v) for v in v0_out]]))
+vN_in = torch.tensor(np.array([[v_in_fn(v) for v in vN_out]]))
+
+#v0_3d = torch.tensor([[3.05e-1,  1.10, 0.]])*2
+#vN_3d = torch.tensor([[8.15e-1, 4.99e-1, 0.]])*2
 
 kinematic3d_config['pinn']['output_transform_fn'] = partial(
     kinematic_fn,
     x0=x0_3d,
     xN=xN_3d,
-    v0=v0_3d,
-    vN=vN_3d)
+    v0=v0_in,
+    vN=vN_in)
 
 results = []
 for config in [kinematic3d_config]:
@@ -40,5 +42,8 @@ for config in [kinematic3d_config]:
     results.append(result)
 
 from src.plotter import TrajectoryPlotter
-plotter = TrajectoryPlotter(results, dim=3, figsize=(7, 7))
+plotter = TrajectoryPlotter(results, dim=3, figsize=(6, 6))
 plotter.plot_all()
+
+
+# %%
