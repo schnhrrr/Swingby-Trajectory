@@ -59,9 +59,9 @@ class TrajectoryOptimizer:
 
     def _compute_thrust(self):
         self.v = torch.stack([torch.autograd.grad(self.r[:, i], self.t, grad_outputs=torch.ones_like(self.r[:, i]), create_graph=True)[0].squeeze(-1)
-                 for i in range(self.dims)], dim=1) / self.t_total
+                 for i in range(self.dims)], dim=1) 
         self.a = torch.stack([torch.autograd.grad(self.v[:, i], self.t, grad_outputs=torch.ones_like(self.v[:, i]), create_graph=True)[0].squeeze(-1)
-                 for i in range(self.dims)], dim=1) / self.t_total
+                 for i in range(self.dims)], dim=1) / self.t_total**2
         self._compute_gravitational_force()
         self.T = self.a - self.G 
         
