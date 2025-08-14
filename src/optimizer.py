@@ -1,6 +1,7 @@
 #%%
 import torch
 from tqdm import tqdm
+import functools
 
 class TrajectoryOptimizer:
     """" Class to optimize the trajectory of a spacecraft using a physics-informed neural network (PINN) denoted in the model attribute.
@@ -67,12 +68,12 @@ class TrajectoryOptimizer:
         
 
     def _train_model(self):
-        import functools
         # Instantiate once
         if isinstance(self.adam, functools.partial):
             adam_optimizer = self.adam(self.model.parameters(), **getattr(self.adam, 'keywords', {}))
         if isinstance(self.lbfgs, functools.partial):
             lbfgs_optimizer = self.lbfgs(self.model.parameters(), **getattr(self.lbfgs, 'keywords', {}))
+        prev_loss = float('inf')
 
         for i in tqdm(range(self.n_adam + self.n_lbfgs)):
             if i < self.n_adam:
@@ -83,6 +84,14 @@ class TrajectoryOptimizer:
             else:
                 self.optimizer = lbfgs_optimizer
                 self.optimizer.step(self._closure)
+
+            current_loss = self.loss_history[-1]
+            loss_change = abs((current_loss - prev_loss) / (prev_loss + self.eps))
+            prev_loss = current_loss
+
+            if loss_change < 1e-5:
+                print(f"Convergence reached at iteration {i} with loss change {loss_change:.6f}.")
+                break
 
     def _closure(self):
 
