@@ -89,7 +89,7 @@ class TrajectoryOptimizer:
             loss_change = abs((current_loss - prev_loss) / (prev_loss + self.eps))
             prev_loss = current_loss
 
-            if loss_change < 1e-5:
+            if (loss_change < 1e-5) & (i > self.n_adam):
                 print(f"Convergence reached at iteration {i} with loss change {loss_change:.6f}.")
                 break
 
