@@ -107,7 +107,8 @@ class TrajectoryPlotter:
         
         self.fig_traj2d, self.ax_traj2d = plt.subplots(2,2, figsize=self.figsize)
         fig, ax = self.fig_traj2d, self.ax_traj2d
-        
+        z_smaller_1 = True
+
         for label, exp in self.experiments.items():
             res, color, qs = exp['result'], exp['color'], exp['quiver_scale']
             x, y, z = res.r[:,0], res.r[:,1], res.r[:,2]
@@ -123,9 +124,9 @@ class TrajectoryPlotter:
             ax[1,0].scatter(res.r0[1],res.r0[2],color='r',marker='o')
             ax[1,0].scatter(res.rN[1],res.rN[2],color='r',marker='x')
 
-            if all(abs(z) < 1):
-                ax[0,1].set_ylim(-1, 1)
-                ax[1,0].set_ylim(-1, 1)
+            if z_smaller_1:
+                if not all(abs(z) < 1):
+                    z_smaller_1 = False
 
             # Plotting gravity and thrust arrows
             if plot_quiver:
@@ -136,6 +137,10 @@ class TrajectoryPlotter:
                 ax[0,1].quiver(r_q[:,0], r_q[:,2], T_q[:,0], T_q[:,2], color='k', scale=qs, label=f'Thrust/{qs}')
                 ax[1,0].quiver(r_q[:,1], r_q[:,2], G_q[:,1], G_q[:,2], color=color, scale=qs, label=f'Gravity/{qs}')
                 ax[1,0].quiver(r_q[:,1], r_q[:,2], T_q[:,1], T_q[:,2], color='k', scale=qs, label=f'Thrust/{qs}')
+        
+        if z_smaller_1:
+            ax[0,1].set_ylim(-1, 1)
+            ax[1,0].set_ylim(-1, 1)
 
         # BC (x,y)
         ax[0,0].scatter(*res.r0[:2],color='r',marker='o',label=r'$r(t=0)$')
@@ -215,6 +220,7 @@ class TrajectoryPlotter:
         self.fig_3d = plt.figure(figsize=(6,6))
         self.ax_3d = self.fig_3d.add_subplot(111, projection='3d')
         fig, ax = self.fig_3d, self.ax_3d
+        z_smaller_1 = True
 
         for label, exp in self.experiments.items():
             res = exp['result']
@@ -227,10 +233,15 @@ class TrajectoryPlotter:
             ax.set_ylabel(r'$y$')
             ax.set_zlabel(r'$z$')
 
-            if (abs(res.r[:,2]) < 1).all():
-                ax.set_zlim(-1, 1)
+            if z_smaller_1:
+                if not (abs(res.r[:,2]) < 1).all():
+                    z_smaller_1 = False
+
             ax.scatter(*res.r0, marker='o', color='red')
             ax.scatter(*res.rN, marker='x', color='red')
+
+        if z_smaller_1:
+            ax.set_zlim(-1, 1)
 
         # Only plot label once
         ax.scatter(*res.r0, marker='o', color='red', label=r'$r(t=0)$')
