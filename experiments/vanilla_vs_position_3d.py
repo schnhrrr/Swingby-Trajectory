@@ -16,11 +16,9 @@ if static_experiment := False:
     vanilla3d_config['optimizer']['w_bc'] = 68.36
 
 vanilla3d_config['optimizer']['w_bc'] = 2.997
-vanilla3d_config['optimizer']['n_adam'] = 2_000
-vanilla3d_config['optimizer']['n_lbfgs'] = 10000
 
-position3d_config['optimizer']['n_adam'] = 1000
-position3d_config['optimizer']['n_lbfgs'] = 10000
+vanilla3d_config['optimizer']['n_adam'] = 2_000
+position3d_config['optimizer']['n_adam'] = 2_000
 
 results = []
 for config in [position3d_config, vanilla3d_config]:
