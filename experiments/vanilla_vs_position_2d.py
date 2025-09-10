@@ -14,8 +14,6 @@ if static_experiment := False:  # Set True for static time experiment
     position2d_config['optimizer']['n_lbfgs'] = 200
 
 vanilla2d_config['optimizer']['w_bc'] = 1.67
-vanilla2d_config['optimizer']['n_lbfgs'] = 10000
-position2d_config['optimizer']['n_lbfgs'] = 10000
 
 results = []
 for config in [position2d_config, vanilla2d_config]:
