@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "swingby-trajectory"
+version = "0.1.0"
+description = "Swingby trajectory optimization using PINNs"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+  { name = "Samuel Schönherr" }
+]
+dependencies = [
+  "numpy",
+  "matplotlib",
+  "torch",
+  "tqdm"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
