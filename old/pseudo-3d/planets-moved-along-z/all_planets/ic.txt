@@ -1,0 +1,6 @@
+
+d is negative for big down small up and vice versa
+
+ao_xyzgm = np.array([[-0.5, -1., -d, 0.5],  # astronomic objects: x, y, z gravitational mass
+                    [-0.2, 0.4, d, 1.0],
+                    [ 0.8, 0.3, -d, 0.5]])
