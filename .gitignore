@@ -6,6 +6,8 @@ venv/
 *.pyc
 *.pyo
 __pycache__/
+*.egg-info/
+*.eggs/
 
 # IDE files (Optional - depending on your editor)
 .idea/
@@ -14,3 +16,5 @@ __pycache__/
 # OS-specific files (Optional)
 .DS_Store   # macOS
 Thumbs.db   # Windows
+**/desktop.ini
+**/*.docx
