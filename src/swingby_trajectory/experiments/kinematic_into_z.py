@@ -4,11 +4,11 @@ import torch
 import numpy as np
 from functools import partial
 
-from ..config.config_3d import kinematic3d_config
-from ..config.shared_parameters import x0_3d, xN_3d, v0_3d, vN_3d
-from ..config.transform_functions import kinematic_fn
-from ..runner import run_experiment, load_results
-from ..plotter import TrajectoryPlotter
+from swingby_trajectory.config.config_3d import kinematic3d_config
+from swingby_trajectory.config.shared_parameters import x0_3d, xN_3d, v0_3d, vN_3d
+from swingby_trajectory.config.transform_functions import kinematic_fn
+from swingby_trajectory.runner import run_experiment, load_results
+from swingby_trajectory.plotter import TrajectoryPlotter
 
 kinematic3d_config["optimizer"]["n_adam"] = 100  # 3000
 kinematic3d_config["optimizer"]["n_lbfgs"] = 300

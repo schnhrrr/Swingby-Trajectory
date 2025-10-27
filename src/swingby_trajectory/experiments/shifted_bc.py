@@ -3,9 +3,9 @@
 from functools import partial
 
 
-from ..config.config_3d import position3d_config
-from ..runner import run_experiment, export_results
-from ..config.transform_functions import position_fn
+from swingby_trajectory.config.config_3d import position3d_config
+from swingby_trajectory.runner import run_experiment, export_results
+from swingby_trajectory.config.transform_functions import position_fn
 import torch
 import numpy as np
 
@@ -31,7 +31,7 @@ for A in np.linspace(0.0, 1.0, 11):
 
 export_results(results, "shifted_bc_3d_results.pkl")
 
-from ..plotter import TrajectoryPlotter
+from swingby_trajectory.plotter import TrajectoryPlotter
 
 plotter = TrajectoryPlotter(results, dim=3, figsize=(7, 7), fig_prefix="shifted_bc_3d")
 plotter.plot_all(plot_quiver=False)

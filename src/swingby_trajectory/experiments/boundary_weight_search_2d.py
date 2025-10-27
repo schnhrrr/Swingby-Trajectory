@@ -1,7 +1,7 @@
 # %%
 import numpy as np
-from ..config.config_2d import vanilla2d_config
-from ..runner import run_experiment
+from swingby_trajectory.config.config_2d import vanilla2d_config
+from swingby_trajectory.runner import run_experiment
 
 vanilla2d_config["optimizer"]["n_adam"] = 2000
 vanilla2d_config["optimizer"]["n_lbfgs"] = 10_000

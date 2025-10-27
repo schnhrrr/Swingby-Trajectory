@@ -1,6 +1,6 @@
 # %%
-from ..config.config_3d import position3d_config, vanilla3d_config
-from ..runner import run_experiment
+from swingby_trajectory.config.config_3d import position3d_config, vanilla3d_config
+from swingby_trajectory.runner import run_experiment
 
 if static_experiment := False:
     del vanilla3d_config["extra_parameters"]
@@ -23,7 +23,7 @@ for config in [position3d_config, vanilla3d_config]:
     results.append(result)
     print(f"E_kin,0 = {sum(result['result'].v[0]**2)/2}")
 
-from ..plotter import TrajectoryPlotter
+from swingby_trajectory.plotter import TrajectoryPlotter
 
 plotter = TrajectoryPlotter(
     results, dim=3, figsize=(7, 7), fig_prefix="position_vanilla_3d"

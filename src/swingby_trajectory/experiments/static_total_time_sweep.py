@@ -1,15 +1,11 @@
 # %%
-import os
-import sys
 import torch
 import numpy as np
 from functools import partial
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from ..config.config_3d import position3d_config
-from ..plotter import TrajectoryPlotter
-from ..runner import run_experiment, export_results
+from swingby_trajectory.config.config_3d import position3d_config
+from swingby_trajectory.plotter import TrajectoryPlotter
+from swingby_trajectory.runner import run_experiment, export_results
 
 position3d_config["optimizer"]["n_adam"] = 1000
 position3d_config["optimizer"]["n_lbfgs"] = 10_000
