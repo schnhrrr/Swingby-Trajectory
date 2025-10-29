@@ -15,6 +15,7 @@ def run_experiment(config):
         for name, param in extra_parameters.items():
             model.register_parameter(str(name), param)
             config["optimizer"][name] = param  # Add to optimizer config
+            print("Trainable Parameter registered: ", name, param, "\n")
 
     opt = TrajectoryOptimizer(model, **config["optimizer"])  # Train the model
     res = TrajectoryResult(config["label"], opt)  # Extract the results
