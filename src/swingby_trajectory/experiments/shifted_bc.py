@@ -24,7 +24,9 @@ for A in np.linspace(0.0, 1.0, 11):
     )
     position3d_config["optimizer"]["r0"] = x0_A(A)
     position3d_config["optimizer"]["rN"] = xN_A(A)
-
+    position3d_config["extra_parameters"]["t_total"] = torch.nn.Parameter(
+        torch.tensor(1.0, requires_grad=True)
+    )
     result = run_experiment(position3d_config)
     print(f"Training of {position3d_config['label']} completed.")
     results.append(result)
