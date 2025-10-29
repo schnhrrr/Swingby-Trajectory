@@ -17,6 +17,7 @@ for config in [position2d_config, vanilla2d_config]:
     print(f"Training of {config['label']} completed.")
     results.append(result)
     print(f"E_kin,0 = {sum(result['result'].v[0]**2)/2}")
+    print(f"TOF: {result['result'].t_total}\n")
 
 from swingby_trajectory.plotter import TrajectoryPlotter
 
