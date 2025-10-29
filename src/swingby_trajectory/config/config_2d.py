@@ -12,7 +12,9 @@ from .shared_parameters import (
 position2d_config = {
     "label": "Position-transformed",
     "seed": 2809,
-    "extra_parameters": {"t_total": torch.nn.Parameter(t_total)},
+    "extra_parameters": {
+        "t_total": torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
+    },
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 2,
@@ -44,7 +46,9 @@ position2d_config = {
 vanilla2d_config = {
     "label": "Vanilla",
     "seed": 2809,
-    "extra_parameters": {"t_total": torch.nn.Parameter(t_total)},
+    "extra_parameters": {
+        "t_total": torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
+    },
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 2,
@@ -101,13 +105,11 @@ vN_ot = (
 )
 
 
-t_total_ot = torch.tensor(3600 * 5).float()  # 5 hours
-
 orbit_transfer_config = {
     "label": "Orbit-transfer",
     "seed": 2809,
     "extra_parameters": {
-        "t_total": torch.nn.Parameter(t_total),
+        "t_total": torch.nn.Parameter(torch.tensor(3600 * 5).float()),  # 5 hours
         "phi_trainable": phi_trainable,
     },
     "pinn": {
@@ -123,12 +125,14 @@ orbit_transfer_config = {
     "optimizer": {
         "ao_rgm": [[0, 0, GM_earth]],  # km^3/s^2
         "t_colloc": torch.linspace(0, 1, 200).view(-1, 1).requires_grad_(True),
-        "t_total": t_total_ot,
+        # "t_total": t_total_ot,
         "r0": x0_ot,
         "rN": xN_ot,
+        "v0": v0_ot,
+        "vN": vN_ot,
         "opt_adam": partial(torch.optim.Adam, lr=1e-3),
         "opt_lbfgs": partial(torch.optim.LBFGS, max_iter=10, lr=0.1),
-        "n_adam": 2000,
+        "n_adam": 100,
         "n_lbfgs": 10_000,
         "w_physics": 1.0,
         "w_bc": 0,

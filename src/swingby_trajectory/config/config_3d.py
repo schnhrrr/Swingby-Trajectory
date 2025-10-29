@@ -14,7 +14,9 @@ from .shared_parameters import (
 position3d_config = {
     "label": "Position-transformed",
     "seed": 2809,
-    "extra_parameters": {"t_total": torch.nn.Parameter(t_total)},
+    "extra_parameters": {
+        "t_total": torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
+    },
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 3,
@@ -46,7 +48,9 @@ position3d_config = {
 vanilla3d_config = {
     "label": "Vanilla",
     "seed": 2809,
-    "extra_parameters": {"t_total": torch.nn.Parameter(t_total)},
+    "extra_parameters": {
+        "t_total": torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
+    },
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 3,
@@ -77,7 +81,9 @@ vanilla3d_config = {
 kinematic3d_config = {
     "label": "Kinematic-transformed",
     "seed": 2809,
-    "extra_parameters": {"t_total": torch.nn.Parameter(t_total)},
+    "extra_parameters": {
+        "t_total": torch.nn.Parameter(torch.tensor(1.0, requires_grad=True))
+    },
     "pinn": {
         "N_INPUT": 1,
         "N_OUTPUT": 3,
