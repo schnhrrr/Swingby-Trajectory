@@ -1,15 +1,19 @@
 # %%
-import os
-import sys
-
 import torch
 import numpy as np
 from functools import partial
 
-from ..config.config_3d import kinematic3d_config
-from ..config.shared_parameters import x0_3d, xN_3d, v0_3d, vN_3d, t_total, t_colloc
-from ..config.transform_functions import kinematic_fn
-from ..runner import run_experiment, load_results
+from swingby_trajectory.config.config_3d import kinematic3d_config
+from swingby_trajectory.config.shared_parameters import (
+    x0_3d,
+    xN_3d,
+    v0_3d,
+    vN_3d,
+    t_total,
+    t_colloc,
+)
+from swingby_trajectory.config.transform_functions import kinematic_fn
+from swingby_trajectory.runner import run_experiment, load_results
 
 # Defining constants
 R_earth = 6378e3  # km
@@ -71,7 +75,7 @@ for config in [orbit_transfer_config]:
     print(f"Training of {config['label']} completed.")
     results.append(result)
 
-from ..plotter import TrajectoryPlotter
+from swingby_trajectory.plotter import TrajectoryPlotter
 
 plotter = TrajectoryPlotter(results, dim=2, figsize=(6, 6), fig_prefix="orbit_transfer")
 plotter.plot_all()

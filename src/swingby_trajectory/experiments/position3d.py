@@ -1,7 +1,7 @@
 # %%
 
-from ..config.config_3d import position3d_config
-from ..runner import run_experiment
+from swingby_trajectory.config.config_3d import position3d_config
+from swingby_trajectory.runner import run_experiment
 
 import random
 
@@ -18,7 +18,7 @@ for seed in seeds:
     print(f"Training of {config['label']} completed.")
     results.append(result)
 
-from ..plotter import TrajectoryPlotter
+from swingby_trajectory.plotter import TrajectoryPlotter
 
 plotter = TrajectoryPlotter(results, dim=3, figsize=(6, 6))
 plotter.plot_traj_3d(plot_quiver=False)
